@@ -1,65 +1,166 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, PlayCircle, Palette, MonitorPlay, MousePointer2 } from "lucide-react";
+import { WaveDivider } from "@/components/ui/wave-divider";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col min-h-screen bg-background">
+
+      {/* --- HERO SECTION (Grid Background + Navy) --- */}
+      <section className="relative w-full py-12 overflow-hidden bg-background">
+        {/* The Tech Grid Background */}
+        <div className="absolute inset-0 bg-grid-pattern z-0 pointer-events-none" />
+
+        {/* Floating Gradient Blob for 'Atmosphere' */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-primary/20 blur-[100px] rounded-full z-0" />
+
+        <div className="container relative z-10 px-4 md:px-6 mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-2 items-center">
+
+            {/* Left: Text Content */}
+            <div className="flex flex-col space-y-6 text-center lg:text-left">
+              <Badge className="w-fit mx-auto lg:mx-0 border-primary/50 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-1.5 text-sm">
+                🚀 Admissions Open for 2026 Batch
+              </Badge>
+
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-foreground drop-shadow-sm">
+                Where <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">Creativity</span> <br />
+                Meets Technology.
+              </h1>
+
+              <p className="max-w-[600px] mx-auto lg:mx-0 text-muted-foreground md:text-xl leading-relaxed">
+                Join Dehradun's premier creative institute. Master <strong>Graphic Design, VFX, and Coding</strong> with an industry-grade curriculum.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-lg h-14 px-8 shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all hover:scale-105" asChild>
+                  <Link href="/courses">
+                    Start Learning
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="h-14 px-8 border-white/10 text-white hover:bg-white/5 hover:text-white" asChild>
+                  <Link href="/admissions">
+                    <PlayCircle className="mr-2 h-5 w-5" />
+                    Watch Demo
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Right: Dynamic "Card Stack" Image Layout (Inspired by your image) */}
+            <div className="relative mx-auto w-full max-w-[500px] aspect-square lg:aspect-auto lg:h-[500px]">
+              {/* Decorative Circle */}
+              <div className="absolute inset-0 bg-linear-to-tr from-primary/30 to-purple-500/10 rounded-full blur-3xl" />
+
+              {/* Main Image Card */}
+              <div className="relative z-20 rounded-2xl overflow-hidden border border-white/10 shadow-2xl transform transition-transform hover:-translate-y-2 duration-500">
+                {/* Replace with real student image */}
+                <div className="w-full h-[400px] bg-neutral-900 flex items-center justify-center relative group">
+                  <Palette className="h-24 w-24 text-white/10 group-hover:text-primary/50 transition-colors" />
+                  <p className="absolute bottom-6 text-white font-medium">Student Work Showcase</p>
+                </div>
+              </div>
+
+              {/* Floating Element 1 (Like the 'Progress Check' in your image) */}
+              <div className="absolute -bottom-6 -left-6 z-30 bg-card border border-white/10 p-4 rounded-xl shadow-xl flex items-center gap-3 animate-bounce-slow">
+                <div className="bg-green-500/20 p-2 rounded-lg">
+                  <CheckCircle2 className="h-6 w-6 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Placement Rate</p>
+                  <p className="text-foreground font-bold">94% Hired</p>
+                </div>
+              </div>
+
+              {/* Floating Element 2 */}
+              <div className="absolute top-10 -right-10 z-10 bg-card border border-white/10 p-4 rounded-xl shadow-xl hidden md:flex items-center gap-3">
+                <div className="bg-accent/20 p-2 rounded-lg">
+                  <MonitorPlay className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Live Batches</p>
+                  <p className="text-foreground font-bold">Graphic & Web</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* The Wavy Divider at bottom */}
+        <WaveDivider position="bottom" />
+      </section>
+
+
+      {/* --- "DISCOVER PROGRAMS" SECTION (Inspired by Image's Grid Cards) --- */}
+      <section className="w-full py-24 bg-muted/30 relative">
+        <div className="container px-4 md:px-6 mx-auto max-w-7xl">
+
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-foreground">
+              Programs Designed for <span className="text-primary">Growth</span>
+            </h2>
+            <p className="mx-auto max-w-[700px] text-muted-foreground text-lg">
+              Practical learning that moves beyond theory. Pick your track.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Card 1: Design */}
+            <Card className="bg-card border-none shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 group overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Palette className="h-24 w-24 text-primary" />
+              </div>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                  <Palette className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Graphic Design</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                Master Photoshop, Illustrator, and Brand Identity. Create visuals that speak.
+              </CardContent>
+            </Card>
+
+            {/* Card 2: Development */}
+            <Card className="bg-card border-none shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 group overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <MousePointer2 className="h-24 w-24 text-muted-foreground" />
+              </div>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-4 group-hover:bg-secondary group-hover:text-white transition-colors">
+                  <MousePointer2 className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-xl">Web Development</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                Build full-stack apps with Next.js, React, and Node. The future of code.
+              </CardContent>
+            </Card>
+
+            {/* Card 3: Video */}
+            <Card className="bg-card border-none shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 group overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <MonitorPlay className="h-24 w-24 text-accent" />
+              </div>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-black transition-colors">
+                  <MonitorPlay className="h-6 w-6 text-accent" />
+                </div>
+                <CardTitle className="text-xl">Video Editing</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                Premiere Pro & After Effects. Tell compelling stories through motion.
+              </CardContent>
+            </Card>
+          </div>
+
         </div>
-      </main>
+      </section>
+
     </div>
   );
 }

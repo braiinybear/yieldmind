@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id          String        @id @default(uuid()) // ✅ Added Auto-ID
+  title       String
+  slug        String        @unique
+  description String
+  thumbnail   String?
+  price       Float
+  type        CourseType    @default(OFFLINE)
+  venue       String?
+  startDate   DateTime?
+  batchSize   Int?
+  duration    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt           // ✅ Added Auto-Update
+  modules CourseModule[]
+  Enrollment  Enrollment[]
+}
+
+model CourseModule {
+  id       String   @id @default(uuid()) // ✅ Added Auto-ID
+  title    String
+  order    Int
+  courseId String
+  Course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+}
+
+model Enrollment {
+  id                String   @id @default(uuid()) // ✅ Added Auto-ID
+  userId            String
+  courseId          String
+  status            EnrollmentStatus @default(PENDING)
+  amountPaid        Float
+  razorpayOrderId   String?          @unique
+  razorpayPaymentId String?          @unique
+  enrolledAt        DateTime         @default(now())
+  Course            Course           @relation(fields: [courseId], references: [id])
+  User              User             @relation(fields: [userId], references: [id])
+
+  @@index([courseId])
+  @@index([userId])
+}
+
+model Lesson {
+  id           String       @id @default(uuid()) // ✅ Added Auto-ID
+  title        String
+  description  String?
+  moduleId     String
+  videoUrl     String?
+  isFree       Boolean      @default(false)
+  order        Int
+  CourseModule CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        String   @id @default(uuid()) // ✅ Added Auto-ID
+  name      String
+  email     String   @unique
+  password  String?
+  phone     String?
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt           // ✅ Added Auto-Update
+  Enrollment Enrollment[]
+
+  @@index([email])
+}
+
+enum CourseType {
+  OFFLINE
+  ONLINE
+  HYBRID
+}
+
+enum EnrollmentStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  TEACHER
+}
