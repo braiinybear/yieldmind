@@ -4,8 +4,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, PlayCircle, Palette, MonitorPlay, MousePointer2 } from "lucide-react";
 import { WaveDivider } from "@/components/ui/wave-divider";
+import { prisma } from "@/lib/db";
+import { CourseCard } from "@/components/shared/CourseCard";
 
-export default function Home() {
+export default async function Home() {
+  // Fetch top 3 featured courses
+  const featuredCourses = await prisma.course.findMany({
+    take: 3,
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      thumbnail: true,
+      price: true,
+      duration: true,
+      type: true,
+    },
+  });
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
 
@@ -160,6 +177,36 @@ export default function Home() {
 
         </div>
       </section>
+
+      {/* --- FEATURED COURSES SECTION --- */}
+      {featuredCourses.length > 0 && (
+        <section className="w-full py-24 bg-background relative">
+          <div className="container px-4 md:px-6 mx-auto max-w-7xl">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-foreground">
+                Featured <span className="text-primary">Courses</span>
+              </h2>
+              <p className="mx-auto max-w-[700px] text-muted-foreground text-lg">
+                Start your learning journey with our most popular courses
+              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {featuredCourses.map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </div>
+
+            <div className="text-center mt-12">
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/courses">
+                  View All Courses
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
     </div>
   );
