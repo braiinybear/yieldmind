@@ -36,7 +36,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         {/* Left: Content */}
                         <AnimatedSection>
-                            <div className="space-y-8">
+                            <div className="space-y-8 py-8">
                                 <div className="flex items-center gap-4">
                                     <div className="px-4 py-1.5 border border-primary/20 bg-primary/10 text-primary uppercase text-xs font-bold tracking-widest">
                                         {course.type}
