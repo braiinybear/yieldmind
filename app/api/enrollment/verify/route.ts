@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyRazorpaySignature } from "@/lib/razorpay";
+import { verifyRazorpaySignature, razorpayInstance } from "@/lib/razorpay";
 import { ApiResponse } from "@/lib/types";
 
 /**
@@ -61,12 +61,32 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Fetch the Razorpay order to get the actual payment amount
+        let paymentAmountInRupees = 0;
+        if (razorpayInstance) {
+            try {
+                const order = await razorpayInstance.orders.fetch(razorpay_order_id);
+                paymentAmountInRupees = Number(order.amount) / 100; // Convert paise to rupees
+            } catch (error) {
+                console.error("Failed to fetch Razorpay order:", error);
+                // Fallback: assume full course price
+                paymentAmountInRupees = enrollment.Course.price;
+            }
+        } else {
+            // Fallback if Razorpay not configured
+            paymentAmountInRupees = enrollment.Course.price;
+        }
+
+        // Calculate new total and check if fully paid
+        const newTotalPaid = enrollment.amountPaid + paymentAmountInRupees;
+        const isFullyPaid = newTotalPaid >= enrollment.Course.price;
+
         // Update enrollment with payment details
         await prisma.enrollment.update({
             where: { id: enrollmentId },
             data: {
-                status: "ACTIVE",
-                amountPaid: enrollment.Course.price,
+                status: isFullyPaid ? "ACTIVE" : "PENDING",
+                amountPaid: newTotalPaid,
                 razorpayPaymentId: razorpay_payment_id,
             },
         });
@@ -74,7 +94,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json<ApiResponse>(
             {
                 success: true,
-                message: "Payment verified successfully. Enrollment is now active!",
+                message: isFullyPaid
+                    ? "Payment verified successfully. Enrollment is now active!"
+                    : `Partial payment of ₹${paymentAmountInRupees} received. Remaining: ₹${enrollment.Course.price - newTotalPaid}`,
             },
             { status: 200 }
         );

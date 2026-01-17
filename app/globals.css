@@ -37,95 +37,94 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* NO ROUNDED CORNERS - Premium Sharp Design */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
 }
 
-/* --- LIGHT MODE (Clean & Professional) --- */
-/* --- DEFAULT THEME (Dark Mode / YieldMind Tech) --- */
+/* ============================================
+   PREMIUM DESIGN SYSTEM - LUXURY THEME
+   ============================================ */
 :root {
-  --radius: 0.625rem;
+  /* NO ROUNDED CORNERS */
+  --radius: 0px;
 
-  /* Background: Deep Navy/Slate (#020817) - Matches the "Tech/Space" vibe */
-  --background: #020817;
-  /* Text: Slate-50 (#F8FAFC) */
-  --foreground: #F8FAFC;
+  /* LUXURY COLOR PALETTE */
+  /* Deep Navy - Primary Background */
+  --background: #0A1628;
+  --foreground: #FFFFFF;
 
-  /* Cards: Slate-900/Navy */
-  --card: #0F172A;
-  --card-foreground: #F8FAFC;
-  --popover: #0F172A;
-  --popover-foreground: #F8FAFC;
+  /* Cards - Slightly lighter navy */
+  --card: #111D33;
+  --card-foreground: #FFFFFF;
+  --popover: #111D33;
+  --popover-foreground: #FFFFFF;
 
-  /* Primary: Vibrant Cyan/Teal (#0EA5E9) */
-  --primary: #0EA5E9;
-  --primary-foreground: #0F172A;
-  /* Dark text on bright button */
+  /* Primary - Luxury Gold */
+  --primary: #D4AF37;
+  --primary-foreground: #0A1628;
 
-  /* Secondary: Deep Slate/Blue (#1E293B) */
-  --secondary: #1E293B;
-  --secondary-foreground: #F8FAFC;
+  /* Secondary - Platinum/Silver */
+  --secondary: #1a2942;
+  --secondary-foreground: #FFFFFF;
 
-  /* Accent: Amber/Gold (#F59E0B) for crucial CTAs */
-  --accent: #F59E0B;
-  --accent-foreground: #020617;
+  /* Accent - Bright Gold for CTAs */
+  --accent: #F4E4C1;
+  --accent-foreground: #0A1628;
 
-  /* Muted: Slate-300 (Brighter for better visibility on dark bg) */
-  --muted: #1E293B;
-  --muted-foreground: #CBD5E1;
+  /* Muted - Subtle backgrounds */
+  --muted: #1a2942;
+  --muted-foreground: #94A3B8;
 
-  /* Destructive: Red-500 */
-  --destructive: #EF4444;
+  /* Semantic Colors */
+  --destructive: #E74C3C;
+  --success: #2ECC71;
+  --warning: #F39C12;
+  --info: #3498DB;
 
-  --border: #1E293B;
-  --input: #1E293B;
-  --ring: #0EA5E9;
+  /* Borders & Inputs */
+  --border: #1E3A5F;
+  --input: #1a2942;
+  --ring: #D4AF37;
 
-  /* Chart Colors */
-  --chart-1: #0EA5E9;
-  --chart-2: #F59E0B;
-  --chart-3: #10B981;
-  --chart-4: #6366F1;
-  --chart-5: #EC4899;
+  /* Chart Colors - Sophisticated Palette */
+  --chart-1: #D4AF37;
+  --chart-2: #3498DB;
+  --chart-3: #2ECC71;
+  --chart-4: #9B59B6;
+  --chart-5: #E74C3C;
 
   /* Sidebar */
-  --sidebar: #020817;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #0EA5E9;
-  --sidebar-primary-foreground: #0F172A;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #F8FAFC;
-  --sidebar-border: #1E293B;
-  --sidebar-ring: #0EA5E9;
+  --sidebar: #0A1628;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #D4AF37;
+  --sidebar-primary-foreground: #0A1628;
+  --sidebar-accent: #1a2942;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #1E3A5F;
+  --sidebar-ring: #D4AF37;
+
+  /* Custom Premium Variables */
+  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 100%);
+  --navy-gradient: linear-gradient(135deg, #0A1628 0%, #1a2942 100%);
+  --overlay-gradient: linear-gradient(180deg, rgba(10, 22, 40, 0.95) 0%, rgba(10, 22, 40, 0.85) 100%);
+
+  /* Shadows - Luxury Depth */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.16);
+  --shadow-gold: 0 8px 32px rgba(212, 175, 55, 0.15);
 }
 
-/* --- LIGHT MODE OPTION (If needed later) --- */
-.light {
-  --background: #FFFFFF;
-  --foreground: #0F172A;
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #0EA5E9;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #0F172A;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #F1F5F9;
-  --accent-foreground: #0F172A;
-  --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #0EA5E9;
-}
-
+/* ============================================
+   BASE STYLES
+   ============================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -133,15 +132,265 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Premium Typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 600;
+  }
+
+  p {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+
+  /* Accent Text */
+  .font-accent {
+    font-family: var(--font-montserrat), sans-serif;
   }
 }
 
-/* Add this to the bottom of app/globals.css */
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+@layer utilities {
 
-.bg-grid-pattern {
-  background-size: 40px 40px;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  /* Gold Gradient Text */
+  .text-gold-gradient {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Premium Container */
+  .container-premium {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .container-premium {
+      padding: 0 1.5rem;
+    }
+  }
+
+  /* Section Spacing - More generous */
+  .section-padding {
+    padding: 8rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .section-padding {
+      padding: 5rem 0;
+    }
+  }
+
+  /* Gold Accent Line */
+  .gold-accent-top {
+    position: relative;
+  }
+
+  .gold-accent-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--gold-gradient);
+  }
+
+  /* Premium Card */
+  .card-premium {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 3rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (max-width: 768px) {
+    .card-premium {
+      padding: 2rem;
+    }
+  }
+
+  .card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-strong);
+    border-color: var(--primary);
+  }
+
+  /* Button Styles */
+  .btn-gold {
+    background: var(--gold-gradient);
+    color: var(--primary-foreground);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 2.5rem;
+    border: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-gold::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-gold:hover::before {
+    left: 100%;
+  }
+
+  .btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold);
+  }
+
+  /* Gradient Overlay */
+  .gradient-overlay {
+    position: relative;
+  }
+
+  .gradient-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--overlay-gradient);
+    pointer-events: none;
+  }
+
+  /* Grid Pattern Background */
+  .bg-grid-premium {
+    background-image:
+      linear-gradient(to right, rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Animated Underline */
+  .underline-animated {
+    position: relative;
+    display: inline-block;
+  }
+
+  .underline-animated::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gold-gradient);
+    transition: width 0.3s ease;
+  }
+
+  .underline-animated:hover::after {
+    width: 100%;
+  }
+
+  /* Parallax Container */
+  .parallax-container {
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Stats Number */
+  .stats-number {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* ============================================
+   COMPONENT OVERRIDES
+   ============================================ */
+/* Remove all border-radius from shadcn components except rounded-full */
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl {
+  border-radius: 0 !important;
+}
+
+/* Allow rounded-full for circular elements like user avatar */
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Selection */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

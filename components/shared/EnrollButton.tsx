@@ -2,142 +2,153 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { loadRazorpayScript, RazorpayOptions } from "@/lib/razorpay";
-import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { loadRazorpayScript } from "@/lib/razorpay";
 
 interface EnrollButtonProps {
     courseId: string;
-    coursePrice: number;
+    price: number;
+    courseName: string;
 }
 
-/**
- * EnrollButton component
- * Handles course enrollment with Razorpay payment integration
- */
-export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
+export default function EnrollButton({ courseId, price, courseName }: EnrollButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { data: session } = useSession();
 
-    const handleEnroll = async () => {
+    const handlePayment = async () => {
+        setIsLoading(true);
+
         try {
-            setIsLoading(true);
-
-            // Load Razorpay script
+            // 1. Load Razorpay Script
             const scriptLoaded = await loadRazorpayScript();
             if (!scriptLoaded) {
-                toast.error("Failed to load payment gateway. Please try again.");
-                return;
+                throw new Error("Failed to load Razorpay. Please check your internet connection.");
             }
 
-            // Create order
-            const createResponse = await fetch("/api/enrollment/create", {
+            // 2. Create Order
+            const response = await fetch("/api/enrollment/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ courseId }),
             });
 
-            if (!createResponse.ok) {
-                const error = await createResponse.json();
-                toast.error(error.message || "Failed to create enrollment");
-                return;
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Failed to create order");
             }
 
-            const orderData = await createResponse.json();
+            // Verify we have the data we need
+            if (!result.data || !result.data.orderId) {
+                throw new Error("Invalid response from server");
+            }
 
-            // Initialize Razorpay
-            const options: RazorpayOptions = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-                amount: orderData.data.amount,
-                currency: orderData.data.currency,
+            const { orderId, amount, currency, enrollmentId } = result.data;
+
+            // 3. Initialize Razorpay
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                amount: amount,
+                currency: currency,
                 name: "YieldMind Academy",
-                description: "Course Enrollment Fee",
-                order_id: orderData.data.orderId,
+                description: `Enrollment for ${courseName}`,
+                order_id: orderId,
+                handler: async function (response: any) {
+                    try {
+                        // 4. Verify Payment
+                        const verifyResponse = await fetch("/api/enrollment/verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                enrollmentId: enrollmentId, // Pass the enrollmentId
+                            }),
+                        });
+
+                        const verifyData = await verifyResponse.json();
+
+                        if (verifyResponse.ok) {
+                            toast.success("Enrollment Successful!", {
+                                description: "Welcome to the course. Redirecting to dashboard...",
+                                duration: 5000,
+                            });
+                            router.push("/dashboard");
+                            router.refresh();
+                        } else {
+                            throw new Error(verifyData.message || "Payment verification failed");
+                        }
+                    } catch (error) {
+                        toast.error("Payment Verification Failed", {
+                            description: "Please contact support if amount was deducted.",
+                        });
+                        console.error(error);
+                    } finally {
+                        setIsLoading(false);
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        // User closed the payment modal
+                        toast.info("Payment Cancelled", {
+                            description: "You can try again when ready.",
+                        });
+                        setIsLoading(false);
+                        router.refresh(); // Refresh to clear pending enrollment
+                    }
+                },
                 prefill: {
-                    name: "",
-                    email: "",
-                    contact: "",
+                    name: session?.user?.name || "",
+                    email: session?.user?.email || "",
                 },
                 theme: {
-                    color: "#0EA5E9", // Primary color
-                },
-                handler: async (response) => {
-                    // Verify payment
-                    await verifyPayment({
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature,
-                        enrollmentId: orderData.data.enrollmentId,
-                    });
+                    color: "#D4AF37", // Luxury Gold
                 },
             };
 
-            // Open Razorpay checkout
-            interface RazorpayInstance {
-                open: () => void;
+            // Check if Razorpay is available
+            if (typeof window === "undefined" || !(window as any).Razorpay) {
+                throw new Error("Razorpay SDK not loaded");
             }
 
-            interface WindowWithRazorpay extends Window {
-                Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
-            }
+            const rzp1 = new (window as any).Razorpay(options);
 
-            const razorpay = new (window as unknown as WindowWithRazorpay).Razorpay(options);
-            razorpay.open();
-
-        } catch (error) {
-            console.error("Enrollment error:", error);
-            toast.error("Something went wrong. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const verifyPayment = async (paymentData: {
-        razorpay_order_id: string;
-        razorpay_payment_id: string;
-        razorpay_signature: string;
-        enrollmentId: string;
-    }) => {
-        try {
-            const verifyResponse = await fetch("/api/enrollment/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(paymentData),
+            // Handle Razorpay errors
+            rzp1.on('payment.failed', function (response: any) {
+                toast.error("Payment Failed", {
+                    description: response.error.description || "Please try again",
+                });
+                setIsLoading(false);
+                router.refresh();
             });
 
-            if (!verifyResponse.ok) {
-                toast.error("Payment verification failed");
-                return;
-            }
+            rzp1.open();
 
-            const result = await verifyResponse.json();
-
-            if (result.success) {
-                toast.success("🎉 Enrollment successful! Welcome to the course.");
-                router.push("/dashboard");
-                router.refresh();
-            } else {
-                toast.error(result.message || "Payment verification failed");
-            }
         } catch (error) {
-            console.error("Verification error:", error);
-            toast.error("Failed to verify payment");
+            console.error("Enrollment Error:", error);
+            toast.error("Enrollment Failed", {
+                description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+            });
+            setIsLoading(false);
+            router.refresh(); // Refresh to clear any pending enrollment
         }
     };
 
     return (
         <Button
-            onClick={handleEnroll}
+            onClick={handlePayment}
             disabled={isLoading}
-            className="w-full h-12 text-lg font-semibold"
-            size="lg"
+            className="w-full btn-gold h-14 text-lg font-bold rounded-none uppercase tracking-wider shadow-gold relative overflow-hidden"
         >
             {isLoading ? (
-                <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Processing...
-                </>
+                <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    <span>Processing...</span>
+                </div>
             ) : (
                 "Enroll Now"
             )}

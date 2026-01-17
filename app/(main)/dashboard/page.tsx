@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { EnrollmentCard } from "@/components/shared/EnrollmentCard";
+import { EnrollmentCard } from "@/components/dashboard/EnrollmentCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GraduationCap, BookOpen } from "lucide-react";

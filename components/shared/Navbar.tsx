@@ -1,16 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { auth } from "@/auth"; // Import auth
-import UserButton from "./UserButton"; // Re-use the component we made earlier
-import MobileNav from "./MobileNav"; // Import the new mobile menu
+import { auth } from "@/auth";
+import UserButton from "./UserButton";
+import MobileNav from "./MobileNav";
 
 export default async function Navbar() {
-  // 1. Fetch the Session
   const session = await auth();
   const user = session?.user;
 
-  // Navigation Links (Desktop)
   const navLinks = [
     { name: "Courses", href: "/courses" },
     { name: "Admissions", href: "/admissions" },
@@ -18,61 +16,65 @@ export default async function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-100 w-full border-b border-primary/10 bg-background/95 backdrop-blur-xl">
+      {/* Gold Accent Line */}
+      <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent z-10" />
 
-        {/* --- LOGO SECTION --- */}
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
+
+        {/* Logo */}
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center gap-3 group">
             <Image
               src="/logo.png"
-              alt="YieldMind Logo"
-              width={160}
-              height={50}
-              className="w-32 md:w-36 h-auto object-contain"
+              alt="YieldMind Academy"
+              width={180}
+              height={60}
+              className="w-40 md:w-44 h-auto object-contain transition-opacity group-hover:opacity-80"
               priority
             />
           </Link>
         </div>
 
-        {/* --- DESKTOP MENU --- */}
-        <div className="hidden md:flex items-center gap-8">
-          <div className="flex gap-6">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-12">
+          <div className="flex gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                className="relative text-sm font-accent font-semibold uppercase tracking-wider text-foreground/80 transition-colors hover:text-primary group"
               >
                 {link.name}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-primary to-primary/50 transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
           </div>
 
           <div className="flex items-center gap-4">
             {user ? (
-              // ✅ Logged In: Show User Button
               <UserButton user={user} />
             ) : (
-              // ❌ Logged Out: Show Login/Enroll
               <>
                 <Link href="/login">
-                  <Button variant="ghost" className="text-foreground hover:text-primary">
-                    Log in
+                  <Button
+                    variant="ghost"
+                    className="text-foreground hover:text-primary font-accent font-semibold uppercase tracking-wider"
+                  >
+                    Log In
                   </Button>
                 </Link>
                 <Link href="/courses">
-                  <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-md">
+                  <button className="btn-gold text-sm py-3 px-6">
                     Enroll Now
-                  </Button>
+                  </button>
                 </Link>
               </>
             )}
           </div>
         </div>
 
-        {/* --- MOBILE MENU --- */}
-        {/* We pass the 'user' prop so the mobile menu knows if we are logged in */}
+        {/* Mobile Menu */}
         <MobileNav user={user} />
 
       </div>
