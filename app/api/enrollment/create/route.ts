@@ -47,27 +47,51 @@ export async function POST(request: NextRequest) {
             where: {
                 userId: session.user.id,
                 courseId: courseId,
-                status: { in: ["ACTIVE", "PENDING"] },
+                status: { in: ["ACTIVE", "PENDING", "COMPLETED"] },
             },
         });
 
         if (existingEnrollment) {
-            return NextResponse.json<ApiResponse>(
-                { success: false, message: "You are already enrolled in this course" },
-                { status: 400 }
-            );
+            // If ACTIVE or COMPLETED, block
+            if (existingEnrollment.status === "ACTIVE" || existingEnrollment.status === "COMPLETED") {
+                return NextResponse.json<ApiResponse>(
+                    { success: false, message: "You are already enrolled in this course" },
+                    { status: 400 }
+                );
+            }
+
+            // If PENDING, delete it to allow fresh restart (simple retry mechanism)
+            if (existingEnrollment.status === "PENDING") {
+                await prisma.enrollment.delete({
+                    where: { id: existingEnrollment.id }
+                });
+            }
         }
 
         // Create Razorpay order
-        const razorpayOrder = await createRazorpayOrder({
-            amount: course.price,
-            currency: "INR",
-            receipt: `enrollment_${Date.now()}`,
-            notes: {
-                courseId: course.id,
-                userId: session.user.id,
-            },
-        });
+        let razorpayOrder;
+        try {
+            razorpayOrder = await createRazorpayOrder({
+                amount: course.price,
+                currency: "INR",
+                receipt: `enrollment_${Date.now()}`,
+                notes: {
+                    courseId: course.id,
+                    userId: session.user.id,
+                },
+            });
+        } catch (razorpayError) {
+            console.error("Razorpay order creation failed:", razorpayError);
+            // Return specific error message for Razorpay configuration issues
+            const errorMessage = razorpayError instanceof Error
+                ? razorpayError.message
+                : "Failed to create payment order";
+
+            return NextResponse.json<ApiResponse>(
+                { success: false, message: errorMessage },
+                { status: 500 }
+            );
+        }
 
         // Create enrollment record with PENDING status
         const enrollment = await prisma.enrollment.create({
@@ -98,6 +122,14 @@ export async function POST(request: NextRequest) {
         );
     } catch (error) {
         console.error("Enrollment creation error:", error);
+
+        // Log detailed error information
+        if (error instanceof Error) {
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
+            console.error("Error stack:", error.stack);
+        }
+
         return NextResponse.json<ApiResponse>(
             { success: false, message: "Failed to create enrollment. Please try again." },
             { status: 500 }

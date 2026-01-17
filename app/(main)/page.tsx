@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, PlayCircle, Palette, MonitorPlay, MousePointer2 } from "lucide-react";
-import { WaveDivider } from "@/components/ui/wave-divider";
 import { prisma } from "@/lib/db";
 import { CourseCard } from "@/components/shared/CourseCard";
+import { AnimatedSection } from "@/components/animations/AnimatedSection";
+import { StatsCounter } from "@/components/animations/StatsCounter";
+import { TextReveal } from "@/components/animations/TextReveal";
+import { ArrowRight, Award, Users, BookOpen, TrendingUp, Star, CheckCircle } from "lucide-react";
 
 export default async function Home() {
   // Fetch top 3 featured courses
@@ -24,189 +24,290 @@ export default async function Home() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen">
 
-      {/* --- HERO SECTION (Strict Semantic Theme) --- */}
-      <section className="relative w-full py-12 overflow-hidden bg-background">
-        {/* The Tech Grid Background - subtle opacity */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] z-0 pointer-events-none" />
+      {/* ============================================
+          HERO SECTION - Full Viewport, Premium
+          ============================================ */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-grid-premium">
+        {/* Background Gradient Overlay */}
+        <div className="absolute inset-0 bg-linear-to-b from-background via-background/95 to-background" />
 
-        {/* Floating Gradient Blob for 'Atmosphere' - using primary color */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-primary/10 blur-[100px] rounded-full z-0" />
+        {/* Animated Gold Accent Lines */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50 z-10" />
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50 z-10" />
 
-        <div className="container relative z-10 px-4 md:px-6 mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-2 items-center">
+        <div className="container-premium relative z-20 py-32">
+          <div className="max-w-5xl mx-auto text-center space-y-16">
 
-            {/* Left: Text Content */}
-            <div className="flex flex-col space-y-6 text-center lg:text-left">
-              <Badge className="w-fit mx-auto lg:mx-0 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 px-4 py-1.5 text-sm ring-1 ring-primary/10">
-                🚀 Admissions Open for 2026 Batch
-              </Badge>
+            {/* Badge */}
+            <AnimatedSection>
+              <div className="inline-block px-6 py-2 border border-primary/30 bg-primary/5 backdrop-blur-sm">
+                <span className="text-primary font-accent font-semibold text-sm tracking-wider uppercase">
+                  Admissions Open 2026
+                </span>
+              </div>
+            </AnimatedSection>
 
-              <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-foreground drop-shadow-sm">
-                Where <span className="text-primary">Creativity</span> <br />
-                Meets Technology.
+            {/* Main Headline */}
+            <TextReveal delay={0.2}>
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-tight">
+                Master The Art of
+                <span className="block text-gold-gradient mt-2">
+                  Creative Excellence
+                </span>
               </h1>
+            </TextReveal>
 
-              <p className="max-w-[600px] mx-auto lg:mx-0 text-muted-foreground md:text-xl leading-relaxed">
-                Join Dehradun's premier creative institute. Master <strong>Graphic Design, VFX, and Coding</strong> with an industry-grade curriculum.
+            {/* Subheadline */}
+            <AnimatedSection delay={0.4}>
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Transform your passion into profession. Join India's premier creative technology institute.
               </p>
+            </AnimatedSection>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-lg h-14 px-8 shadow-lg shadow-accent/20 transition-all hover:scale-105" asChild>
-                  <Link href="/courses">
-                    Start Learning
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" className="h-14 px-8 border-input text-foreground hover:bg-secondary" asChild>
-                  <Link href="/admissions">
-                    <PlayCircle className="mr-2 h-5 w-5" />
-                    Watch Demo
-                  </Link>
-                </Button>
+            {/* CTA Buttons */}
+            <AnimatedSection delay={0.6}>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
+                <Link href="/courses">
+                  <button className="btn-gold group">
+                    Explore Courses
+                    <ArrowRight className="inline-block ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </Link>
+                <Link href="/admissions">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-14 px-8 border-2 border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary font-accent font-semibold uppercase tracking-wider"
+                  >
+                    Apply Now
+                  </Button>
+                </Link>
               </div>
-            </div>
+            </AnimatedSection>
 
-            {/* Right: Dynamic "Card Stack" Image Layout */}
-            <div className="relative mx-auto w-full max-w-[500px] aspect-square lg:aspect-auto lg:h-[500px]">
-              {/* Decorative Circle */}
-              <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-indigo-500/10 rounded-full blur-3xl opacity-60" />
-
-              {/* Main Image Card */}
-              <div className="relative z-20 rounded-2xl overflow-hidden border border-border shadow-2xl transform transition-transform hover:-translate-y-2 duration-500 bg-card">
-                {/* Replace with real student image */}
-                <div className="w-full h-[400px] bg-muted/50 flex items-center justify-center relative group">
-                  <Palette className="h-24 w-24 text-muted-foreground/20 group-hover:text-primary/50 transition-colors" />
-                  <p className="absolute bottom-6 text-muted-foreground font-medium">Student Work Showcase</p>
+            {/* Floating Stats Cards */}
+            <AnimatedSection delay={0.8}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-20 max-w-4xl mx-auto">
+                <div className="card-premium text-center">
+                  <div className="stats-number">
+                    <StatsCounter endValue={500} suffix="+" />
+                  </div>
+                  <p className="text-muted-foreground mt-2 font-accent text-sm uppercase tracking-wide">Students</p>
+                </div>
+                <div className="card-premium text-center">
+                  <div className="stats-number">
+                    <StatsCounter endValue={95} suffix="%" />
+                  </div>
+                  <p className="text-muted-foreground mt-2 font-accent text-sm uppercase tracking-wide">Placement</p>
+                </div>
+                <div className="card-premium text-center">
+                  <div className="stats-number">
+                    <StatsCounter endValue={12} suffix="+" />
+                  </div>
+                  <p className="text-muted-foreground mt-2 font-accent text-sm uppercase tracking-wide">Courses</p>
+                </div>
+                <div className="card-premium text-center">
+                  <div className="stats-number">
+                    <StatsCounter endValue={8} suffix="+" />
+                  </div>
+                  <p className="text-muted-foreground mt-2 font-accent text-sm uppercase tracking-wide">Years</p>
                 </div>
               </div>
-
-              {/* Floating Element 1 - Clean Card */}
-              <div className="absolute -bottom-6 -left-6 z-30 bg-card border border-border p-4 rounded-xl shadow-xl flex items-center gap-3 animate-bounce-slow ring-1 ring-border/50">
-                <div className="bg-green-500/10 p-2 rounded-lg">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium">Placement Rate</p>
-                  <p className="text-foreground font-bold">94% Hired</p>
-                </div>
-              </div>
-
-              {/* Floating Element 2 - Clean Card */}
-              <div className="absolute top-10 -right-10 z-10 bg-card border border-border p-4 rounded-xl shadow-xl hidden md:flex items-center gap-3 ring-1 ring-border/50">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <MonitorPlay className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium">Live Batches</p>
-                  <p className="text-foreground font-bold">Graphic & Web</p>
-                </div>
-              </div>
-            </div>
+            </AnimatedSection>
 
           </div>
         </div>
-
-        {/* The Wavy Divider at bottom */}
-        <WaveDivider position="bottom" />
       </section>
 
-
-      {/* --- "DISCOVER PROGRAMS" SECTION (Inspired by Image's Grid Cards) --- */}
-      <section className="w-full py-24 bg-muted/30 relative">
-        <div className="container px-4 md:px-6 mx-auto max-w-7xl">
-
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-foreground">
-              Programs Designed for <span className="text-primary">Growth</span>
-            </h2>
-            <p className="mx-auto max-w-[700px] text-muted-foreground text-lg">
-              Practical learning that moves beyond theory. Pick your track.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Card 1: Design */}
-            <Card className="bg-card border-none shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 group overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Palette className="h-24 w-24 text-primary" />
-              </div>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                  <Palette className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl">Graphic Design</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">
-                Master Photoshop, Illustrator, and Brand Identity. Create visuals that speak.
-              </CardContent>
-            </Card>
-
-            {/* Card 2: Development */}
-            <Card className="bg-card border-none shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 group overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <MousePointer2 className="h-24 w-24 text-muted-foreground" />
-              </div>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-4 group-hover:bg-secondary group-hover:text-white transition-colors">
-                  <MousePointer2 className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl">Web Development</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">
-                Build full-stack apps with Next.js, React, and Node. The future of code.
-              </CardContent>
-            </Card>
-
-            {/* Card 3: Video */}
-            <Card className="bg-card border-none shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1 group overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <MonitorPlay className="h-24 w-24 text-accent" />
-              </div>
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-black transition-colors">
-                  <MonitorPlay className="h-6 w-6 text-accent" />
-                </div>
-                <CardTitle className="text-xl">Video Editing</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">
-                Premiere Pro & After Effects. Tell compelling stories through motion.
-              </CardContent>
-            </Card>
-          </div>
-
-        </div>
-      </section>
-
-      {/* --- FEATURED COURSES SECTION --- */}
+      {/* ============================================
+          FEATURED COURSES SECTION
+          ============================================ */}
       {featuredCourses.length > 0 && (
-        <section className="w-full py-24 bg-background relative">
-          <div className="container px-4 md:px-6 mx-auto max-w-7xl">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-foreground">
-                Featured <span className="text-primary">Courses</span>
-              </h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground text-lg">
-                Start your learning journey with our most popular courses
-              </p>
-            </div>
+        <section className="section-padding bg-card/30 relative z-10">
+          <div className="container-premium">
+
+            <AnimatedSection>
+              <div className="text-center mb-24">
+                <div className="inline-block px-4 py-1 border border-primary/20 bg-primary/5 mb-8">
+                  <span className="text-primary font-accent text-sm tracking-wider uppercase">Featured Programs</span>
+                </div>
+                <h2 className="text-5xl md:text-6xl font-bold mb-8">
+                  Start Your <span className="text-gold-gradient">Journey</span>
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Industry-leading courses designed by experts, built for creators
+                </p>
+              </div>
+            </AnimatedSection>
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {featuredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+              {featuredCourses.map((course, index) => (
+                <AnimatedSection key={course.id} delay={index * 0.1}>
+                  <CourseCard course={course} />
+                </AnimatedSection>
               ))}
             </div>
 
-            <div className="text-center mt-12">
-              <Button size="lg" variant="outline" asChild>
+            <AnimatedSection delay={0.4}>
+              <div className="text-center mt-16">
                 <Link href="/courses">
-                  View All Courses
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-14 px-10 border-2 border-primary/30 hover:bg-primary/10 hover:border-primary font-accent font-semibold uppercase tracking-wider"
+                  >
+                    View All Courses
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
                 </Link>
-              </Button>
-            </div>
+              </div>
+            </AnimatedSection>
+
           </div>
         </section>
       )}
+
+      {/* ============================================
+          WHY CHOOSE US SECTION
+          ============================================ */}
+      <section className="section-padding bg-background relative z-10">
+        <div className="container-premium">
+
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+
+            {/* Left: Content */}
+            <AnimatedSection>
+              <div className="space-y-10">
+                <div>
+                  <div className="inline-block px-4 py-1 border border-primary/20 bg-primary/5 mb-6">
+                    <span className="text-primary font-accent text-sm tracking-wider uppercase">Why YieldMind</span>
+                  </div>
+                  <h2 className="text-5xl md:text-6xl font-bold mb-8">
+                    Excellence in <span className="text-gold-gradient">Education</span>
+                  </h2>
+                  <p className="text-xl text-muted-foreground leading-relaxed">
+                    We don't just teach skills—we build careers. Our comprehensive approach ensures you're industry-ready from day one.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  {[
+                    { icon: Award, title: "Industry-Certified Curriculum", desc: "Learn from real-world projects and case studies" },
+                    { icon: Users, title: "Expert Mentorship", desc: "Direct guidance from industry professionals" },
+                    { icon: TrendingUp, title: "Career Support", desc: "Placement assistance and portfolio building" },
+                    { icon: Star, title: "Lifetime Access", desc: "Continuous learning with updated content" }
+                  ].map((item, index) => (
+                    <div key={index} className="flex gap-4 items-start group">
+                      <div className="p-3 bg-primary/10 border border-primary/20 group-hover:bg-primary transition-colors">
+                        <item.icon className="h-6 w-6 text-primary group-hover:text-background transition-colors" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
+                        <p className="text-muted-foreground">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </AnimatedSection>
+
+            {/* Right: Image/Visual */}
+            <AnimatedSection delay={0.2}>
+              <div className="relative">
+                <div className="aspect-square bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 p-12 flex items-center justify-center">
+                  <div className="text-center space-y-6">
+                    <BookOpen className="h-32 w-32 text-primary mx-auto" />
+                    <p className="text-2xl font-bold">Transforming Futures</p>
+                    <p className="text-muted-foreground">Since 2016</p>
+                  </div>
+                </div>
+                {/* Decorative Elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 border-t-2 border-r-2 border-primary/30" />
+                <div className="absolute -bottom-4 -left-4 w-24 h-24 border-b-2 border-l-2 border-primary/30" />
+              </div>
+            </AnimatedSection>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          STATS SECTION - Dark Background
+          ============================================ */}
+      <section className="section-padding bg-card relative z-10">
+        <div className="container-premium">
+          <AnimatedSection>
+            <div className="text-center mb-20">
+              <h2 className="text-5xl md:text-6xl font-bold mb-8">
+                Our <span className="text-gold-gradient">Impact</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Numbers that speak for themselves
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { value: 500, suffix: "+", label: "Students Trained" },
+              { value: 95, suffix: "%", label: "Placement Rate" },
+              { value: 50, suffix: "+", label: "Hiring Partners" },
+              { value: 12, suffix: "+", label: "Industry Experts" }
+            ].map((stat, index) => (
+              <AnimatedSection key={index} delay={index * 0.1}>
+                <div className="text-center p-8 border border-primary/20 hover:border-primary transition-colors group">
+                  <div className="stats-number mb-4">
+                    <StatsCounter endValue={stat.value} suffix={stat.suffix} />
+                  </div>
+                  <p className="text-muted-foreground font-accent text-sm uppercase tracking-wide group-hover:text-primary transition-colors">
+                    {stat.label}
+                  </p>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          CTA SECTION
+          ============================================ */}
+      <section className="section-padding bg-linear-to-br from-background via-primary/5 to-background relative overflow-hidden z-10">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-grid-premium opacity-30 z-0" />
+
+        <div className="container-premium relative z-10">
+          <AnimatedSection>
+            <div className="max-w-4xl mx-auto text-center space-y-8">
+              <h2 className="text-5xl md:text-6xl font-bold">
+                Ready to <span className="text-gold-gradient">Transform</span> Your Career?
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Join hundreds of successful students who've launched their creative careers with YieldMind Academy
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
+                <Link href="/register">
+                  <button className="btn-gold group">
+                    Start Your Journey
+                    <ArrowRight className="inline-block ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </Link>
+                <Link href="/courses">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-14 px-8 border-2 border-primary/30 hover:bg-primary/10 hover:border-primary font-accent font-semibold uppercase tracking-wider"
+                  >
+                    Browse Courses
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
 
     </div>
   );

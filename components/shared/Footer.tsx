@@ -1,92 +1,187 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Linkedin, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
+    const currentYear = new Date().getFullYear();
+
+    const footerLinks = {
+        programs: [
+            { name: "Graphic Design", href: "/courses" },
+            { name: "Web Development", href: "/courses" },
+            { name: "Video Editing", href: "/courses" },
+            { name: "VFX & Animation", href: "/courses" },
+        ],
+        company: [
+            { name: "About Us", href: "/about" },
+            { name: "Admissions", href: "/admissions" },
+            { name: "Contact", href: "/contact" },
+            { name: "Careers", href: "/careers" },
+        ],
+        resources: [
+            { name: "Student Portal", href: "/dashboard" },
+            { name: "Course Catalog", href: "/courses" },
+            { name: "FAQs", href: "/faqs" },
+            { name: "Blog", href: "/blog" },
+        ],
+    };
+
     return (
-        <footer className="bg-muted/30 border-t border-border mt-auto">
-            <div className="container px-4 md:px-6 py-12 mx-auto max-w-7xl">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <footer className="bg-card py-4 border-t border-primary/10 relative overflow-hidden">
+            {/* Gold Accent Line */}
+            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
+
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-grid-premium opacity-20" />
+
+            <div className="container-premium relative z-10 py-20">
+
+                {/* Main Footer Content */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
 
                     {/* Brand Column */}
-                    <div className="space-y-4">
-                        <Link href="/" className="flex items-center gap-2">
+                    <div className="lg:col-span-2 space-y-6">
+                        <Link href="/" className="inline-block">
                             <Image
                                 src="/logo.png"
-                                alt="YieldMind Logo"
-                                width={140}
-                                height={45}
-                                className="w-32 h-auto object-contain"
+                                alt="YieldMind Academy"
+                                width={200}
+                                height={70}
+                                className="h-auto w-48 object-contain"
                             />
                         </Link>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            Dehradun's premier institute for Graphic Design, Web Development, and VFX. Empowering the next generation of creators.
+                        <p className="text-muted-foreground leading-relaxed max-w-sm">
+                            Transforming creative passion into professional excellence since 2016.
+                            India's premier institute for design, development, and digital arts.
                         </p>
 
-                        {/* Social Icons */}
-                        <div className="flex gap-4 pt-2">
-                            <Link href="#" className="bg-card p-2 rounded-full shadow-sm hover:shadow-md hover:text-primary transition-all border border-border">
-                                <Instagram className="h-4 w-4" />
-                            </Link>
-                            <Link href="#" className="bg-card p-2 rounded-full shadow-sm hover:shadow-md hover:text-primary transition-all border border-border">
-                                <Facebook className="h-4 w-4" />
-                            </Link>
-                            <Link href="#" className="bg-card p-2 rounded-full shadow-sm hover:shadow-md hover:text-primary transition-all border border-border">
-                                <Linkedin className="h-4 w-4" />
-                            </Link>
-                            <Link href="#" className="bg-card p-2 rounded-full shadow-sm hover:shadow-md hover:text-primary transition-all border border-border">
-                                <Twitter className="h-4 w-4" />
-                            </Link>
+                        {/* Social Links */}
+                        <div className="flex gap-4">
+                            {[
+                                { icon: Facebook, href: "#", label: "Facebook" },
+                                { icon: Instagram, href: "#", label: "Instagram" },
+                                { icon: Linkedin, href: "#", label: "LinkedIn" },
+                            ].map((social, index) => (
+                                <a
+                                    key={index}
+                                    href={social.href}
+                                    aria-label={social.label}
+                                    className="p-3 border border-primary/20 hover:border-primary hover:bg-primary/10 transition-all group"
+                                >
+                                    <social.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </a>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Quick Links */}
+                    {/* Programs */}
                     <div>
-                        <h3 className="font-semibold text-foreground mb-4">Programs</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/courses/graphic-design" className="hover:text-primary transition-colors">Graphic Design</Link></li>
-                            <li><Link href="/courses/web-development" className="hover:text-primary transition-colors">Web Development</Link></li>
-                            <li><Link href="/courses/video-editing" className="hover:text-primary transition-colors">Video Editing</Link></li>
-                            <li><Link href="/courses/vfx" className="hover:text-primary transition-colors">VFX & 3D</Link></li>
+                        <h3 className="text-lg font-bold mb-6 text-gold-gradient">Programs</h3>
+                        <ul className="space-y-3">
+                            {footerLinks.programs.map((link) => (
+                                <li key={link.name}>
+                                    <Link
+                                        href={link.href}
+                                        className="text-muted-foreground hover:text-primary transition-colors text-sm underline-animated inline-block"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
-                    {/* Useful Links */}
+                    {/* Company */}
                     <div>
-                        <h3 className="font-semibold text-foreground mb-4">Institute</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
-                            <li><Link href="/admissions" className="hover:text-primary transition-colors">Admissions</Link></li>
-                            <li><Link href="/campus" className="hover:text-primary transition-colors">Campus Life</Link></li>
-                            <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+                        <h3 className="text-lg font-bold mb-6 text-gold-gradient">Company</h3>
+                        <ul className="space-y-3">
+                            {footerLinks.company.map((link) => (
+                                <li key={link.name}>
+                                    <Link
+                                        href={link.href}
+                                        className="text-muted-foreground hover:text-primary transition-colors text-sm underline-animated inline-block"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
-                    {/* Contact Info */}
+                    {/* Resources */}
                     <div>
-                        <h3 className="font-semibold text-foreground mb-4">Contact Us</h3>
-                        <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-primary shrink-0" />
-                                <span>YieldMind Institute, Rajpur Road, Dehradun, Uttarakhand, India 248001</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <Phone className="h-4 w-4 text-primary shrink-0" />
-                                <span>+91 98765 43210</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <Mail className="h-4 w-4 text-primary shrink-0" />
-                                <span>admissions@yieldmind.com</span>
-                            </li>
+                        <h3 className="text-lg font-bold mb-6 text-gold-gradient">Resources</h3>
+                        <ul className="space-y-3">
+                            {footerLinks.resources.map((link) => (
+                                <li key={link.name}>
+                                    <Link
+                                        href={link.href}
+                                        className="text-muted-foreground hover:text-primary transition-colors text-sm underline-animated inline-block"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} YieldMind Institute. All rights reserved.</p>
+                {/* Contact Info Bar */}
+                <div className="border-t border-primary/10 pt-12 mb-12">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-primary/10 border border-primary/20">
+                                <MapPin className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold mb-1">Visit Us</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    Dehradun, Uttarakhand<br />India
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-primary/10 border border-primary/20">
+                                <Phone className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold mb-1">Call Us</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    +91 XXXXX XXXXX
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-primary/10 border border-primary/20">
+                                <Mail className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold mb-1">Email Us</h4>
+                                <p className="text-sm text-muted-foreground">
+                                    info@yieldmind.academy
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Bottom Bar */}
+                <div className="border-t border-primary/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-muted-foreground">
+                        © {currentYear} YieldMind Academy. All rights reserved.
+                    </p>
+                    <div className="flex gap-6">
+                        <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                            Privacy Policy
+                        </Link>
+                        <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                            Terms of Service
+                        </Link>
+                    </div>
+                </div>
+
             </div>
         </footer>
     );

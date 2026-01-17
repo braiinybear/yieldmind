@@ -1,213 +1,228 @@
+import { getCourseBySlug, getEnrollmentStatus } from "@/lib/actions";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { Badge } from "@/components/ui/badge";
-import { ModuleSyllabus } from "@/components/shared/ModuleSyllabus";
-import { EnrollButton } from "@/components/shared/EnrollButton";
-import { formatPrice, formatDate } from "@/lib/formatters";
-import { Clock, Calendar, Users, MapPin, BookOpen } from "lucide-react";
-import { CourseType } from "@prisma/client";
+import Image from "next/image";
+import ModuleSyllabus from "@/components/shared/ModuleSyllabus";
+import EnrollmentCard from "@/components/shared/EnrollmentCard";
+import { auth } from "@/auth";
+import { AnimatedSection } from "@/components/animations/AnimatedSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Clock, BarChart, Users, Star, Globe, CheckCircle2 } from "lucide-react";
 
-interface CourseDetailsPageProps {
-    params: Promise<{ slug: string }>;
-}
-
-/**
- * Course Details Page
- * Displays full course information including syllabus and enrollment option
- */
-export default async function CourseDetailsPage({ params }: CourseDetailsPageProps) {
+export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
+    // Resolve params properly
     const { slug } = await params;
+    const course = await getCourseBySlug(slug);
 
-    // Fetch course with modules and lessons
-    const course = await prisma.course.findUnique({
-        where: { slug },
-        include: {
-            modules: {
-                include: {
-                    lessons: {
-                        orderBy: { order: 'asc' },
-                    },
-                },
-                orderBy: { order: 'asc' },
-            },
-        },
-    });
-
-    // Handle 404
     if (!course) {
         notFound();
     }
 
-    const totalLessons = course.modules.reduce(
-        (acc, module) => acc + module.lessons.length,
-        0
-    );
+    const session = await auth();
+    const enrollment = session?.user?.id
+        ? await getEnrollmentStatus(course.id, session.user.id)
+        : null;
+
+    const isEnrolled = enrollment?.status === "ACTIVE" || enrollment?.status === "COMPLETED";
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Hero Section */}
-            <section className="relative bg-linear-to-br from-primary/10 via-background to-accent/5 py-16 border-b">
-                <div className="container px-4 md:px-6 mx-auto max-w-7xl">
-                    <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-                        {/* Left: Course Info */}
-                        <div className="space-y-6">
-                            {/* Course Type Badge */}
-                            <CourseTypeBadge type={course.type} />
+        <main className="min-h-screen bg-background">
+            {/* Split Hero Section */}
+            <section className="relative bg-[#050C16] border-b border-primary/10 overflow-hidden">
+                {/* Background Effects */}
+                <div className="absolute inset-0 bg-grid-premium opacity-10" />
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
 
-                            {/* Title */}
-                            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-foreground">
-                                {course.title}
-                            </h1>
+                <div className="container-premium py-20 lg:py-28 relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                        {/* Left: Content */}
+                        <AnimatedSection>
+                            <div className="space-y-8">
+                                <div className="flex items-center gap-4">
+                                    <div className="px-4 py-1.5 border border-primary/20 bg-primary/10 text-primary uppercase text-xs font-bold tracking-widest">
+                                        {course.type}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-gold-gradient">
+                                        <Star className="fill-current h-4 w-4" />
+                                        <Star className="fill-current h-4 w-4" />
+                                        <Star className="fill-current h-4 w-4" />
+                                        <Star className="fill-current h-4 w-4" />
+                                        <Star className="fill-current h-4 w-4" />
+                                        <span className="text-muted-foreground text-sm ml-2">(4.9/5.0)</span>
+                                    </div>
+                                </div>
 
-                            {/* Description */}
-                            <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
-                                {course.description}
-                            </p>
+                                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                                    {course.title}
+                                </h1>
 
-                            {/* Course Stats */}
-                            <div className="flex flex-wrap gap-6 pt-4">
-                                {course.duration && (
-                                    <div className="flex items-center gap-2 text-sm">
+                                <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
+                                    {course.description}
+                                </p>
+
+                                <div className="flex flex-wrap gap-y-4 gap-x-8 text-sm font-accent text-white/80 pt-4">
+                                    <div className="flex items-center gap-2">
                                         <Clock className="h-5 w-5 text-primary" />
-                                        <span className="font-medium">{course.duration}</span>
+                                        <span>{course.duration || "Self Paced"}</span>
                                     </div>
-                                )}
-
-                                {course.startDate && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Calendar className="h-5 w-5 text-primary" />
-                                        <span className="font-medium">Starts {formatDate(course.startDate)}</span>
+                                    <div className="flex items-center gap-2">
+                                        <BarChart className="h-5 w-5 text-primary" />
+                                        <span>All Levels</span>
                                     </div>
-                                )}
-
-                                {course.batchSize && (
-                                    <div className="flex items-center gap-2 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="h-5 w-5 text-primary" />
+                                        <span>English</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
                                         <Users className="h-5 w-5 text-primary" />
-                                        <span className="font-medium">Batch Size: {course.batchSize}</span>
-                                    </div>
-                                )}
-
-                                <div className="flex items-center gap-2 text-sm">
-                                    <BookOpen className="h-5 w-5 text-primary" />
-                                    <span className="font-medium">
-                                        {course.modules.length} Modules • {totalLessons} Lessons
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Venue (for OFFLINE/HYBRID) */}
-                            {(course.type === "OFFLINE" || course.type === "HYBRID") && course.venue && (
-                                <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
-                                    <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="font-semibold text-sm text-foreground mb-1">Venue</p>
-                                        <p className="text-sm text-muted-foreground">{course.venue}</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Right: Enrollment Card */}
-                        <div className="lg:sticky lg:top-24 h-fit">
-                            <div className="bg-card border rounded-xl p-6 shadow-lg space-y-6">
-                                {/* Price */}
-                                <div className="text-center py-4 border-b">
-                                    <p className="text-sm text-muted-foreground mb-2">Course Fee</p>
-                                    <p className="text-4xl font-bold text-primary">
-                                        {formatPrice(course.price)}
-                                    </p>
-                                </div>
-
-                                {/* Enroll Button */}
-                                <EnrollButton courseId={course.id} coursePrice={course.price} />
-
-                                {/* Features */}
-                                <div className="space-y-3 pt-4 border-t text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <CheckIcon />
-                                        <span>Lifetime Access</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckIcon />
-                                        <span>Certificate of Completion</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckIcon />
-                                        <span>Expert Instructor Support</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckIcon />
-                                        <span>Hands-on Projects</span>
+                                        <span>500+ Enrolled</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </AnimatedSection>
+
+                        {/* Right: Video/Image Preview (Placeholder for now) */}
+                        <AnimatedSection delay={0.2}>
+                            <div className="relative aspect-video bg-black border border-primary/20 shadow-2xl overflow-hidden group">
+                                <Image
+                                    src={course.thumbnail || "/placeholder-course.jpg"}
+                                    alt={course.title}
+                                    fill
+                                    className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-20 h-20 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center cursor-pointer group-hover:scale-110 transition-transform hover:bg-primary hover:text-primary-foreground backdrop-blur-sm">
+                                        <div className="w-0 h-0 border-t-10 border-t-transparent border-l-20 border-l-current border-b-10 border-b-transparent ml-2" />
+                                    </div>
+                                </div>
+                            </div>
+                        </AnimatedSection>
                     </div>
                 </div>
             </section>
 
-            {/* Syllabus Section */}
-            <section className="py-16">
-                <div className="container px-4 md:px-6 mx-auto max-w-4xl">
-                    <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-foreground mb-2">
-                            Course Syllabus
-                        </h2>
-                        <p className="text-muted-foreground">
-                            Explore the comprehensive curriculum designed by industry experts
-                        </p>
-                    </div>
+            {/* Content Section */}
+            <section className="section-padding relative z-10">
+                <div className="container-premium px-4">
+                    <div className="grid lg:grid-cols-3 gap-12">
 
-                    <ModuleSyllabus modules={course.modules} />
+                        {/* Main Content Column */}
+                        <div className="lg:col-span-2">
+                            <Tabs defaultValue="overview" className="w-full">
+                                <AnimatedSection delay={0.3}>
+                                    <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 mb-12 rounded-none h-auto">
+                                        <TabsTrigger
+                                            value="overview"
+                                            className="rounded-none border-b-2 border-transparent px-8 py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
+                                        >
+                                            Overview
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="curriculum"
+                                            className="rounded-none border-b-2 border-transparent px-8 py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
+                                        >
+                                            Curriculum
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="instructor"
+                                            className="rounded-none border-b-2 border-transparent px-8 py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
+                                        >
+                                            Instructor
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </AnimatedSection>
+
+                                <TabsContent value="overview" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <AnimatedSection>
+                                        <h3 className="text-3xl font-bold mb-6">Course Description</h3>
+                                        <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
+                                            <p>{course.description}</p>
+                                            <p className="mt-4">
+                                                This comprehensive course is designed to take you from basics to advanced concepts.
+                                                You will learn through practical examples, hands-on projects, and expert guidance.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 gap-8 mt-12">
+                                            <div className="bg-card p-8 border border-primary/10 hover:border-primary/30 transition-colors">
+                                                <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                                    <span className="w-1 h-6 bg-primary inline-block mr-2"></span>
+                                                    What You'll Learn
+                                                </h4>
+                                                <ul className="space-y-3">
+                                                    {[
+                                                        "Master core concepts and principles",
+                                                        "Build real-world projects",
+                                                        "Industry-standard workflows",
+                                                        "Professional certification"
+                                                    ].map((item, i) => (
+                                                        <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                                                            <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                                            <span>{item}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+
+                                            <div className="bg-card p-8 border border-primary/10 hover:border-primary/30 transition-colors">
+                                                <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                                    <span className="w-1 h-6 bg-primary inline-block mr-2"></span>
+                                                    Requirements
+                                                </h4>
+                                                <ul className="space-y-3">
+                                                    {[
+                                                        "Basic computer knowledge",
+                                                        "Passion for learning",
+                                                        "No prior experience needed"
+                                                    ].map((item, i) => (
+                                                        <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                                                            <span className="text-primary mt-1 font-bold">•</span>
+                                                            <span>{item}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </AnimatedSection>
+                                </TabsContent>
+
+                                <TabsContent value="curriculum" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <AnimatedSection>
+                                        <ModuleSyllabus modules={course.modules} />
+                                    </AnimatedSection>
+                                </TabsContent>
+
+                                <TabsContent value="instructor" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <AnimatedSection>
+                                        <div className="flex flex-col md:flex-row items-start gap-8 bg-card p-10 border border-primary/10">
+                                            <div className="w-32 h-32 bg-muted relative shrink-0 border-2 border-primary/20 overflow-hidden">
+                                                {/* Instructor Image Placeholder */}
+                                                <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-background flex items-center justify-center">
+                                                    <span className="text-2xl font-bold text-primary">YM</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold mb-2">YieldMind Expert</h3>
+                                                <p className="text-primary font-accent text-sm uppercase tracking-wider mb-4">Senior Instructor</p>
+                                                <p className="text-muted-foreground leading-relaxed">
+                                                    Our courses are taught by industry veterans with over 10 years of experience in the field.
+                                                    They have worked with top global brands and bring real-world insights into the classroom.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </AnimatedSection>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="lg:col-span-1">
+                            <AnimatedSection delay={0.4}>
+                                <EnrollmentCard course={course} enrollment={enrollment} />
+                            </AnimatedSection>
+                        </div>
+                    </div>
                 </div>
             </section>
-        </div>
-    );
-}
-
-/**
- * Course Type Badge component
- */
-function CourseTypeBadge({ type }: { type: CourseType }) {
-    const variants: Record<CourseType, { label: string; className: string }> = {
-        OFFLINE: {
-            label: "📍 Offline",
-            className: "bg-blue-500/10 text-blue-700 border-blue-500/20",
-        },
-        ONLINE: {
-            label: "💻 Online",
-            className: "bg-green-500/10 text-green-700 border-green-500/20",
-        },
-        HYBRID: {
-            label: "🔄 Hybrid",
-            className: "bg-purple-500/10 text-purple-700 border-purple-500/20",
-        },
-    };
-
-    const variant = variants[type];
-
-    return (
-        <Badge variant="outline" className={`${variant.className} text-sm px-3 py-1`}>
-            {variant.label}
-        </Badge>
-    );
-}
-
-/**
- * Check Icon component
- */
-function CheckIcon() {
-    return (
-        <svg
-            className="h-5 w-5 text-green-600 shrink-0"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-        >
-            <path d="M5 13l4 4L19 7" />
-        </svg>
+        </main>
     );
 }

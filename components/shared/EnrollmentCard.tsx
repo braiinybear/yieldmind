@@ -1,135 +1,122 @@
-import Link from "next/link";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+"use client";
+
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { EnrollmentWithCourse } from "@/lib/types";
-import { formatPrice, formatDate } from "@/lib/formatters";
-import { EnrollmentStatus } from "@prisma/client";
-import { CheckCircle2, Clock, XCircle, Ban } from "lucide-react";
+import { formatPrice } from "@/lib/formatters";
+import { CheckCircle, Lock, PlayCircle, Clock, Award, AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import EnrollButton from "./EnrollButton";
+import Link from "next/link";
 
 interface EnrollmentCardProps {
-    enrollment: EnrollmentWithCourse;
+    course: any;
+    enrollment: any; // Enrollment object or null
 }
 
-/**
- * Reusable EnrollmentCard component
- * Displays enrollment information with course details
- */
-export function EnrollmentCard({ enrollment }: EnrollmentCardProps) {
-    const { Course, status, amountPaid, enrolledAt } = enrollment;
+export default function EnrollmentCard({ course, enrollment }: EnrollmentCardProps) {
+    const { data: session } = useSession();
+    const router = useRouter();
+
+    const isEnrolled = enrollment?.status === "ACTIVE" || enrollment?.status === "COMPLETED";
+    const isPending = enrollment?.status === "PENDING";
 
     return (
-        <Card className="group hover:shadow-lg transition-all duration-300">
-            <div className="flex flex-col md:flex-row">
-                {/* Thumbnail */}
-                <div className="relative h-48 md:h-auto md:w-48 overflow-hidden rounded-t-xl md:rounded-l-xl md:rounded-tr-none bg-muted shrink-0">
-                    {Course.thumbnail ? (
-                        <img
-                            src={Course.thumbnail}
-                            alt={Course.title}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-primary/20 to-accent/20">
-                            <span className="text-4xl font-bold text-muted-foreground/30">
-                                {Course.title.charAt(0)}
+        <div className="sticky top-24">
+            <div className="bg-card border border-primary/20 p-8 shadow-strong relative overflow-hidden group">
+                {/* Gold Accent Overlay */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient" />
+                <div className="absolute inset-0 bg-gold-gradient opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none" />
+
+                <div className="space-y-8 relative z-10">
+                    {/* Price Section */}
+                    <div className="space-y-2">
+                        <p className="text-muted-foreground font-accent text-sm uppercase tracking-widest">Total Investment</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold text-foreground">
+                                {formatPrice(course.price)}
                             </span>
                         </div>
-                    )}
-                </div>
+                    </div>
 
-                {/* Content */}
-                <div className="flex-1 flex flex-col">
-                    <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                            <CardTitle className="text-xl line-clamp-2">
-                                {Course.title}
-                            </CardTitle>
-                            <EnrollmentStatusBadge status={status} />
-                        </div>
-                    </CardHeader>
-
-                    <CardContent className="flex-1 space-y-3">
-                        {/* Amount Paid */}
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Amount Paid:</span>
-                            <span className="font-semibold text-primary">
-                                {formatPrice(amountPaid)}
-                            </span>
-                        </div>
-
-                        {/* Enrolled Date */}
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Enrolled On:</span>
-                            <span className="font-medium">
-                                {formatDate(enrolledAt)}
-                            </span>
-                        </div>
-
-                        {/* Duration */}
-                        {Course.duration && (
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Duration:</span>
-                                <span className="font-medium">{Course.duration}</span>
-                            </div>
+                    {/* Action Button */}
+                    <div className="space-y-3">
+                        {isPending ? (
+                            <>
+                                <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-3">
+                                    <div className="flex items-start gap-2">
+                                        <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                                                Payment Pending
+                                            </p>
+                                            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                                                Complete your payment or verify if already paid
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button
+                                    className="w-full h-14 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-bold text-lg rounded-none uppercase tracking-wider"
+                                    asChild
+                                >
+                                    <Link href="/dashboard">
+                                        Go to Dashboard
+                                    </Link>
+                                </Button>
+                            </>
+                        ) : isEnrolled ? (
+                            <Button
+                                className="w-full h-14 bg-success/10 text-success border border-success/20 hover:bg-success/20 font-bold text-lg rounded-none uppercase tracking-wider"
+                                disabled
+                            >
+                                <CheckCircle className="mr-2 h-5 w-5" />
+                                Already Enrolled
+                            </Button>
+                        ) : session ? (
+                            <EnrollButton
+                                courseId={course.id}
+                                price={course.price}
+                                courseName={course.title}
+                            />
+                        ) : (
+                            <Button
+                                className="w-full btn-gold h-14 text-lg font-bold rounded-none uppercase tracking-wider shadow-gold"
+                                onClick={() => router.push("/login")}
+                            >
+                                <Lock className="mr-2 h-5 w-5" />
+                                Login to Enroll
+                            </Button>
                         )}
-                    </CardContent>
 
-                    <CardFooter>
-                        <Button
-                            asChild
-                            className="w-full"
-                            variant={status === "ACTIVE" ? "default" : "outline"}
-                            disabled={status === "CANCELLED"}
-                        >
-                            <Link href={`/courses/${Course.slug}`}>
-                                {status === "ACTIVE" ? "Continue Learning" : "View Course"}
-                            </Link>
-                        </Button>
-                    </CardFooter>
+                        <p className="text-xs text-center text-muted-foreground font-accent">
+                            30-Day Money-Back Guarantee
+                        </p>
+                    </div>
+
+                    {/* Features List */}
+                    <div className="space-y-6 pt-6 border-t border-border">
+                        <h4 className="font-bold text-lg">This Course Includes:</h4>
+                        <ul className="space-y-4">
+                            <li className="flex items-center gap-3 text-muted-foreground">
+                                <PlayCircle className="h-5 w-5 text-primary" />
+                                <span>12+ Hours of Video Content</span>
+                            </li>
+                            <li className="flex items-center gap-3 text-muted-foreground">
+                                <Clock className="h-5 w-5 text-primary" />
+                                <span>Full Lifetime Access</span>
+                            </li>
+                            <li className="flex items-center gap-3 text-muted-foreground">
+                                <Award className="h-5 w-5 text-primary" />
+                                <span>Certificate of Completion</span>
+                            </li>
+                            <li className="flex items-center gap-3 text-muted-foreground">
+                                <CheckCircle className="h-5 w-5 text-primary" />
+                                <span>Access on Mobile and TV</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </Card>
-    );
-}
-
-/**
- * Enrollment Status Badge component
- * Shows different colors and icons based on status
- */
-function EnrollmentStatusBadge({ status }: { status: EnrollmentStatus }) {
-    const variants: Record<
-        EnrollmentStatus,
-        { label: string; className: string; icon: React.ReactNode }
-    > = {
-        PENDING: {
-            label: "Pending",
-            className: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
-            icon: <Clock className="h-3 w-3" />,
-        },
-        ACTIVE: {
-            label: "Active",
-            className: "bg-green-500/10 text-green-700 border-green-500/20",
-            icon: <CheckCircle2 className="h-3 w-3" />,
-        },
-        COMPLETED: {
-            label: "Completed",
-            className: "bg-blue-500/10 text-blue-700 border-blue-500/20",
-            icon: <CheckCircle2 className="h-3 w-3" />,
-        },
-        CANCELLED: {
-            label: "Cancelled",
-            className: "bg-red-500/10 text-red-700 border-red-500/20",
-            icon: <XCircle className="h-3 w-3" />,
-        },
-    };
-
-    const variant = variants[status];
-
-    return (
-        <Badge className={variant.className}>
-            {variant.icon}
-            {variant.label}
-        </Badge>
+        </div>
     );
 }
