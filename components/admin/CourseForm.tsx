@@ -83,6 +83,7 @@ export default function CourseForm({
 }: CourseFormProps) {
   const createCourse = useCourseStore((state) => state.createCourse);
   const updateCourse = useCourseStore((state) => state.updateCourse);
+  const fetchCourse = useCourseStore((state) => state.fetchCourses);
   const createLoading = useCourseStore((state) => state.loading.create);
   const updateLoading = useCourseStore((state) => state.loading.update);
 
@@ -255,9 +256,11 @@ export default function CourseForm({
       // Check if editing or creating
       if (course?.id) {
         await updateCourse(course.id, payload);
+        await fetchCourse()
         toast.success("Course updated successfully!");
       } else {
         await createCourse(payload);
+        await fetchCourse()
         toast.success("Course created successfully!");
       }
       

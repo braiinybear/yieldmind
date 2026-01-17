@@ -59,7 +59,7 @@ export default function AdminCoursePage() {
   /* ---------- Effects ---------- */
   useEffect(() => {
     fetchCourses();
-  }, [fetchCourses, createloading, updateLoading, deleteLoading]);
+  }, [fetchCourses]);
 
   /* ---------- Handlers ---------- */
 
