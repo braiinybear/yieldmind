@@ -103,13 +103,14 @@ export default function AdminLayout({
         {/* Logo Section */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
           <div className="flex items-center mb-[-30] mt-[-30]">
+           <Link href="/">
             <Image
               src="/logo.png"
               height={150}
               width={150}
               alt="YieldMind"
               className="rounded-lg block"
-            />
+            /></Link>
           </div>
 
           <button
