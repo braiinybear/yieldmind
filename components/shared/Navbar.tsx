@@ -1,20 +1,16 @@
-"use client";
-
 import Link from "next/link";
-import { Menu, X } from "lucide-react"; // Icons
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle, // Accessibility requirement
-} from "@/components/ui/sheet";
-import { useState } from "react";
+import { auth } from "@/auth"; // Import auth
+import UserButton from "./UserButton"; // Re-use the component we made earlier
+import MobileNav from "./MobileNav"; // Import the new mobile menu
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+export default async function Navbar() {
+  // 1. Fetch the Session
+  const session = await auth();
+  const user = session?.user;
 
-  // Navigation Links
+  // Navigation Links (Desktop)
   const navLinks = [
     { name: "Courses", href: "/courses" },
     { name: "Admissions", href: "/admissions" },
@@ -23,23 +19,23 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-      {/* Container: Controls max-width for Big Screens */}
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* --- LOGO SECTION --- */}
         <div className="flex items-center gap-2">
-          {/* Replace this with <Image /> when you have the logo file */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">Y</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-foreground">
-              Yield<span className="text-primary">Mind</span>
-            </span>
+            <Image
+              src="/logo.png"
+              alt="YieldMind Logo"
+              width={160}
+              height={50}
+              className="w-32 md:w-36 h-auto object-contain"
+              priority
+            />
           </Link>
         </div>
 
-        {/* --- DESKTOP MENU (Hidden on Mobile) --- */}
+        {/* --- DESKTOP MENU --- */}
         <div className="hidden md:flex items-center gap-8">
           <div className="flex gap-6">
             {navLinks.map((link) => (
@@ -52,68 +48,32 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          <div className="flex gap-4">
-            <Button variant="ghost" className="text-foreground hover:text-primary">
-              Log in
-            </Button>
-            {/* The GOLD Action Button */}
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-md">
-              Enroll Now
-            </Button>
+
+          <div className="flex items-center gap-4">
+            {user ? (
+              // ✅ Logged In: Show User Button
+              <UserButton user={user} />
+            ) : (
+              // ❌ Logged Out: Show Login/Enroll
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="text-foreground hover:text-primary">
+                    Log in
+                  </Button>
+                </Link>
+                <Link href="/courses">
+                  <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-md">
+                    Enroll Now
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
-        {/* --- MOBILE MENU (Visible only on small screens) --- */}
-        <div className="md:hidden">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-foreground">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-
-            {/* The Slide-Out Drawer */}
-            <SheetContent side="right" className="w-[300px] border-l border-border bg-background sm:w-[350px]">
-              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle> {/* Accessibility Fix */}
-
-              <div className="flex flex-col gap-6 mt-6">
-                {/* Mobile Logo */}
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-white font-bold">Y</span>
-                  </div>
-                  <span className="text-lg font-bold text-foreground">YieldMind</span>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)} // Close menu on click
-                      className="text-lg font-medium text-foreground hover:text-primary transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                </div>
-
-                <div className="mt-4 flex flex-col gap-3">
-                  <Button
-                    className="w-full bg-accent text-accent-foreground font-bold hover:bg-accent/90"
-                    size="lg"
-                  >
-                    Enroll Now
-                  </Button>
-                  <Button variant="outline" className="w-full border-primary/20" size="lg">
-                    Log in
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+        {/* --- MOBILE MENU --- */}
+        {/* We pass the 'user' prop so the mobile menu knows if we are logged in */}
+        <MobileNav user={user} />
 
       </div>
     </nav>

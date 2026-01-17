@@ -9,25 +9,25 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
 
-      {/* --- HERO SECTION (Grid Background + Navy) --- */}
+      {/* --- HERO SECTION (Strict Semantic Theme) --- */}
       <section className="relative w-full py-12 overflow-hidden bg-background">
-        {/* The Tech Grid Background */}
-        <div className="absolute inset-0 bg-grid-pattern z-0 pointer-events-none" />
+        {/* The Tech Grid Background - subtle opacity */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] z-0 pointer-events-none" />
 
-        {/* Floating Gradient Blob for 'Atmosphere' */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-primary/20 blur-[100px] rounded-full z-0" />
+        {/* Floating Gradient Blob for 'Atmosphere' - using primary color */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-primary/10 blur-[100px] rounded-full z-0" />
 
         <div className="container relative z-10 px-4 md:px-6 mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-2 items-center">
 
             {/* Left: Text Content */}
             <div className="flex flex-col space-y-6 text-center lg:text-left">
-              <Badge className="w-fit mx-auto lg:mx-0 border-primary/50 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-1.5 text-sm">
+              <Badge className="w-fit mx-auto lg:mx-0 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 px-4 py-1.5 text-sm ring-1 ring-primary/10">
                 🚀 Admissions Open for 2026 Batch
               </Badge>
 
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-foreground drop-shadow-sm">
-                Where <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">Creativity</span> <br />
+                Where <span className="text-primary">Creativity</span> <br />
                 Meets Technology.
               </h1>
 
@@ -36,12 +36,12 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-lg h-14 px-8 shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all hover:scale-105" asChild>
+                <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-lg h-14 px-8 shadow-lg shadow-accent/20 transition-all hover:scale-105" asChild>
                   <Link href="/courses">
                     Start Learning
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="h-14 px-8 border-white/10 text-white hover:bg-white/5 hover:text-white" asChild>
+                <Button size="lg" variant="outline" className="h-14 px-8 border-input text-foreground hover:bg-secondary" asChild>
                   <Link href="/admissions">
                     <PlayCircle className="mr-2 h-5 w-5" />
                     Watch Demo
@@ -50,38 +50,38 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: Dynamic "Card Stack" Image Layout (Inspired by your image) */}
+            {/* Right: Dynamic "Card Stack" Image Layout */}
             <div className="relative mx-auto w-full max-w-[500px] aspect-square lg:aspect-auto lg:h-[500px]">
               {/* Decorative Circle */}
-              <div className="absolute inset-0 bg-linear-to-tr from-primary/30 to-purple-500/10 rounded-full blur-3xl" />
+              <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-indigo-500/10 rounded-full blur-3xl opacity-60" />
 
               {/* Main Image Card */}
-              <div className="relative z-20 rounded-2xl overflow-hidden border border-white/10 shadow-2xl transform transition-transform hover:-translate-y-2 duration-500">
+              <div className="relative z-20 rounded-2xl overflow-hidden border border-border shadow-2xl transform transition-transform hover:-translate-y-2 duration-500 bg-card">
                 {/* Replace with real student image */}
-                <div className="w-full h-[400px] bg-neutral-900 flex items-center justify-center relative group">
-                  <Palette className="h-24 w-24 text-white/10 group-hover:text-primary/50 transition-colors" />
-                  <p className="absolute bottom-6 text-white font-medium">Student Work Showcase</p>
+                <div className="w-full h-[400px] bg-muted/50 flex items-center justify-center relative group">
+                  <Palette className="h-24 w-24 text-muted-foreground/20 group-hover:text-primary/50 transition-colors" />
+                  <p className="absolute bottom-6 text-muted-foreground font-medium">Student Work Showcase</p>
                 </div>
               </div>
 
-              {/* Floating Element 1 (Like the 'Progress Check' in your image) */}
-              <div className="absolute -bottom-6 -left-6 z-30 bg-card border border-white/10 p-4 rounded-xl shadow-xl flex items-center gap-3 animate-bounce-slow">
-                <div className="bg-green-500/20 p-2 rounded-lg">
-                  <CheckCircle2 className="h-6 w-6 text-green-400" />
+              {/* Floating Element 1 - Clean Card */}
+              <div className="absolute -bottom-6 -left-6 z-30 bg-card border border-border p-4 rounded-xl shadow-xl flex items-center gap-3 animate-bounce-slow ring-1 ring-border/50">
+                <div className="bg-green-500/10 p-2 rounded-lg">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Placement Rate</p>
+                  <p className="text-xs text-muted-foreground font-medium">Placement Rate</p>
                   <p className="text-foreground font-bold">94% Hired</p>
                 </div>
               </div>
 
-              {/* Floating Element 2 */}
-              <div className="absolute top-10 -right-10 z-10 bg-card border border-white/10 p-4 rounded-xl shadow-xl hidden md:flex items-center gap-3">
-                <div className="bg-accent/20 p-2 rounded-lg">
-                  <MonitorPlay className="h-6 w-6 text-accent" />
+              {/* Floating Element 2 - Clean Card */}
+              <div className="absolute top-10 -right-10 z-10 bg-card border border-border p-4 rounded-xl shadow-xl hidden md:flex items-center gap-3 ring-1 ring-border/50">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <MonitorPlay className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Live Batches</p>
+                  <p className="text-xs text-muted-foreground font-medium">Live Batches</p>
                   <p className="text-foreground font-bold">Graphic & Web</p>
                 </div>
               </div>
