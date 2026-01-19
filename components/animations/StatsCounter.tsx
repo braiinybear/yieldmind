@@ -53,7 +53,12 @@ export function StatsCounter({
     return (
         <span className={className}>
             {prefix}
-            <span ref={counterRef}>0</span>
+            <span
+                ref={counterRef}
+                className="tabular-nums"
+            >
+                0
+            </span>
             {suffix}
         </span>
     );

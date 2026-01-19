@@ -206,7 +206,7 @@ export default async function Home() {
                   ].map((item, index) => (
                     <div key={index} className="flex gap-4 items-start group">
                       <div className="p-3 bg-primary/10 border border-primary/20 group-hover:bg-primary transition-colors">
-                        <item.icon className="h-6 w-6 text-primary group-hover:text-background transition-colors" />
+                        <item.icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
                       </div>
                       <div>
                         <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
