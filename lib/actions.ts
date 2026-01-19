@@ -16,6 +16,7 @@ export const getCourseBySlug = cache(async (slug: string) => {
                     },
                     orderBy: { order: "asc" },
                 },
+                information: true,
             },
         });
         return course;

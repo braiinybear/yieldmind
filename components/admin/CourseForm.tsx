@@ -9,14 +9,22 @@ import { toast } from "sonner";
 export interface CourseFormData {
   title: string;
   slug: string;
+  shortDescription: string;
   description: string;
+  instructorName: string;
+  instructorBio: string;
   thumbnail: string;
+  demoVideo: string;
   price: number;
+  difficulty: string;
   type: string;
   venue: string;
   startDate: Date | null;
   batchSize: number | null;
   duration: string;
+  includes: string[];
+  learningOutcomes: string[];
+  requirements: string[];
 }
 
 interface CourseWithModules extends Course {
@@ -62,9 +70,14 @@ interface ModulePayload {
 interface CoursePayload {
   title: string;
   slug: string;
+  shortDescription: string | null;
   description: string;
+  instructorName: string | null;
+  instructorBio: string | null;
   thumbnail: string | null;
+  demoVideo: string | null;
   price: number;
+  difficulty: string;
   type: string;
   venue: string | null;
   startDate: string | null;
@@ -72,9 +85,16 @@ interface CoursePayload {
   duration: string | null;
 }
 
+export interface CourseInformationPayload {
+  includes: string[];
+  learningOutcomes: string[];
+  requirements: string[];
+}
+
 export interface CreateCoursePayload {
   course: CoursePayload;
   modules: ModulePayload[];
+  information: CourseInformationPayload;
 }
 
 export default function CourseForm({
@@ -90,16 +110,24 @@ export default function CourseForm({
   const [formData, setFormData] = useState(() => ({
     title: course?.title || "",
     slug: course?.slug || "",
+    shortDescription: course?.shortDescription || "",
     description: course?.description || "",
+    instructorName: course?.instructorName || "",
+    instructorBio: course?.instructorBio || "",
     thumbnail: course?.thumbnail || "",
+    demoVideo: course?.demoVideo || "",
     price: course?.price?.toString() || "",
+    difficulty: course?.difficulty || "BEGINNER",
     type: course?.type || "ONLINE",
     venue: course?.venue || "",
-    startDate: course?.startDate 
+    startDate: course?.startDate
       ? new Date(course.startDate).toISOString().split("T")[0]
       : "",
     batchSize: course?.batchSize?.toString() || "",
     duration: course?.duration || "",
+    includes: [],
+    learningOutcomes: [],
+    requirements: [],
   }));
 
   const [modules, setModules] = useState<CourseModule[]>([]);
@@ -215,6 +243,28 @@ export default function CourseForm({
     );
   };
 
+  // Helper functions for array fields
+  const addArrayItem = (field: 'includes' | 'learningOutcomes' | 'requirements') => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: [...prev[field], '']
+    }));
+  };
+
+  const updateArrayItem = (field: 'includes' | 'learningOutcomes' | 'requirements', index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].map((item, i) => i === index ? value : item)
+    }));
+  };
+
+  const deleteArrayItem = (field: 'includes' | 'learningOutcomes' | 'requirements', index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -229,9 +279,14 @@ export default function CourseForm({
         course: {
           title: formData.title,
           slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
+          shortDescription: formData.shortDescription && formData.shortDescription.trim() ? formData.shortDescription : null,
           description: formData.description,
+          instructorName: formData.instructorName && formData.instructorName.trim() ? formData.instructorName : null,
+          instructorBio: formData.instructorBio && formData.instructorBio.trim() ? formData.instructorBio : null,
           thumbnail: formData.thumbnail && formData.thumbnail.trim() ? formData.thumbnail : null,
+          demoVideo: formData.demoVideo && formData.demoVideo.trim() ? formData.demoVideo : null,
           price: parseFloat(formData.price) || 0,
+          difficulty: formData.difficulty,
           type: formData.type,
           venue: formData.venue && formData.venue.trim() ? formData.venue : null,
           startDate: formData.startDate || null,
@@ -249,10 +304,15 @@ export default function CourseForm({
             order: lesson.order,
           })),
         })),
+        information: {
+          includes: formData.includes,
+          learningOutcomes: formData.learningOutcomes,
+          requirements: formData.requirements,
+        },
       };
 
       console.log("Sending payload:", JSON.stringify(payload, null, 2));
-      
+
       // Check if editing or creating
       if (course?.id) {
         await updateCourse(course.id, payload);
@@ -263,7 +323,7 @@ export default function CourseForm({
         await fetchCourse()
         toast.success("Course created successfully!");
       }
-      
+
       onClose();
     } catch (error) {
       toast.error("Failed to save course");
@@ -335,6 +395,21 @@ export default function CourseForm({
                 />
               </div>
 
+              {/* Short Description */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Short Description
+                </label>
+                <textarea
+                  name="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Brief summary for course cards"
+                />
+              </div>
+
               {/* Description */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -366,6 +441,51 @@ export default function CourseForm({
                 />
               </div>
 
+              {/* Demo Video */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Demo Video URL
+                </label>
+                <input
+                  type="url"
+                  name="demoVideo"
+                  value={formData.demoVideo}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/demo.mp4"
+                />
+              </div>
+
+              {/* Instructor Name */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Instructor Name
+                </label>
+                <input
+                  type="text"
+                  name="instructorName"
+                  value={formData.instructorName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter instructor name"
+                />
+              </div>
+
+              {/* Instructor Bio */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Instructor Bio
+                </label>
+                <textarea
+                  name="instructorBio"
+                  value={formData.instructorBio}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter instructor biography"
+                />
+              </div>
+
               {/* Price and Type Row */}
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
@@ -384,6 +504,31 @@ export default function CourseForm({
                     placeholder="0.00"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Difficulty Level *
+                  </label>
+                  <select
+                    name="difficulty"
+                    value={formData.difficulty}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border text-black border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option className="text-black" value="BEGINNER">
+                      Beginner
+                    </option>
+                    <option className="text-black" value="INTERMEDIATE">
+                      Intermediate
+                    </option>
+                    <option className="text-black" value="ADVANCED">
+                      Advanced
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Course Type and Venue Row */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Course Type *
@@ -405,10 +550,6 @@ export default function CourseForm({
                     </option>
                   </select>
                 </div>
-              </div>
-
-              {/* Venue and Start Date Row */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Venue
@@ -422,6 +563,10 @@ export default function CourseForm({
                     placeholder="Enter venue location"
                   />
                 </div>
+              </div>
+
+              {/* Start Date and Duration Row */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Start Date
@@ -432,24 +577,6 @@ export default function CourseForm({
                     value={formData.startDate}
                     onChange={handleChange}
                     className="w-full px-4 text-black py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Batch Size and Duration Row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Batch Size
-                  </label>
-                  <input
-                    type="number"
-                    name="batchSize"
-                    value={formData.batchSize}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2 border text-black border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., 30"
                   />
                 </div>
                 <div>
@@ -464,6 +591,158 @@ export default function CourseForm({
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., 4 weeks"
                   />
+                </div>
+              </div>
+
+              {/* Batch Size */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Batch Size
+                </label>
+                <input
+                  type="number"
+                  name="batchSize"
+                  value={formData.batchSize}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-2 border text-black border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., 30"
+                />
+              </div>
+            </div>
+
+            {/* Course Information Section */}
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <h3 className="text-sm font-bold text-slate-900 mb-4">
+                Additional Course Information
+              </h3>
+
+              {/* What's Included */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-700">
+                    What's Included
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('includes')}
+                    className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                  >
+                    <Plus size={14} />
+                    Add Item
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {formData.includes.length === 0 ? (
+                    <p className="text-xs text-slate-500 text-center py-2">
+                      No items added. Click "Add Item" to add what's included in this course.
+                    </p>
+                  ) : (
+                    formData.includes.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => updateArrayItem('includes', index, e.target.value)}
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="e.g., Lifetime access to course materials"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteArrayItem('includes', index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Learning Outcomes */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Learning Outcomes
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('learningOutcomes')}
+                    className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                  >
+                    <Plus size={14} />
+                    Add Outcome
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {formData.learningOutcomes.length === 0 ? (
+                    <p className="text-xs text-slate-500 text-center py-2">
+                      No outcomes added. Click "Add Outcome" to add what students will learn.
+                    </p>
+                  ) : (
+                    formData.learningOutcomes.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => updateArrayItem('learningOutcomes', index, e.target.value)}
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="e.g., Master core concepts and principles"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteArrayItem('learningOutcomes', index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Requirements */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Requirements
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('requirements')}
+                    className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                  >
+                    <Plus size={14} />
+                    Add Requirement
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {formData.requirements.length === 0 ? (
+                    <p className="text-xs text-slate-500 text-center py-2">
+                      No requirements added. Click "Add Requirement" to add prerequisites.
+                    </p>
+                  ) : (
+                    formData.requirements.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => updateArrayItem('requirements', index, e.target.value)}
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="e.g., Basic computer knowledge"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteArrayItem('requirements', index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ import EnrollmentCard from "@/components/shared/EnrollmentCard";
 import { auth } from "@/auth";
 import { AnimatedSection } from "@/components/animations/AnimatedSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, BarChart, Users, Star, Globe, CheckCircle2 } from "lucide-react";
+import { Clock, BarChart, Users, Globe, CheckCircle2 } from "lucide-react";
 
 export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
     // Resolve params properly
@@ -41,13 +41,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                     <div className="px-4 py-1.5 border border-primary/20 bg-primary/10 text-primary uppercase text-xs font-bold tracking-widest">
                                         {course.type}
                                     </div>
-                                    <div className="flex items-center gap-1 text-gold-gradient">
-                                        <Star className="fill-current h-4 w-4" />
-                                        <Star className="fill-current h-4 w-4" />
-                                        <Star className="fill-current h-4 w-4" />
-                                        <Star className="fill-current h-4 w-4" />
-                                        <Star className="fill-current h-4 w-4" />
-                                        <span className="text-muted-foreground text-sm ml-2">(4.9/5.0)</span>
+                                    <div className="px-4 py-1.5 border border-gold-gradient/20 bg-gold-gradient/10 text-gold-gradient uppercase text-xs font-bold tracking-widest">
+                                        {course.difficulty}
                                     </div>
                                 </div>
 
@@ -56,7 +51,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                 </h1>
 
                                 <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                                    {course.description}
+                                    {course.shortDescription || course.description}
                                 </p>
 
                                 <div className="flex flex-wrap gap-y-4 gap-x-8 text-sm font-accent text-white/80 pt-4">
@@ -66,34 +61,51 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <BarChart className="h-5 w-5 text-primary" />
-                                        <span>All Levels</span>
+                                        <span>{course.difficulty}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Globe className="h-5 w-5 text-primary" />
-                                        <span>English</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Users className="h-5 w-5 text-primary" />
-                                        <span>500+ Enrolled</span>
-                                    </div>
+                                    {course.venue && (
+                                        <div className="flex items-center gap-2">
+                                            <Globe className="h-5 w-5 text-primary" />
+                                            <span>{course.venue}</span>
+                                        </div>
+                                    )}
+                                    {course.batchSize && (
+                                        <div className="flex items-center gap-2">
+                                            <Users className="h-5 w-5 text-primary" />
+                                            <span>Batch Size: {course.batchSize}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </AnimatedSection>
 
-                        {/* Right: Video/Image Preview (Placeholder for now) */}
+                        {/* Right: Video/Image Preview */}
                         <AnimatedSection delay={0.2}>
                             <div className="relative aspect-video bg-black border border-primary/20 shadow-2xl overflow-hidden group">
-                                <Image
-                                    src={course.thumbnail || "/placeholder-course.jpg"}
-                                    alt={course.title}
-                                    fill
-                                    className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-20 h-20 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center cursor-pointer group-hover:scale-110 transition-transform hover:bg-primary hover:text-primary-foreground backdrop-blur-sm">
-                                        <div className="w-0 h-0 border-t-10 border-t-transparent border-l-20 border-l-current border-b-10 border-b-transparent ml-2" />
-                                    </div>
-                                </div>
+                                {course.demoVideo ? (
+                                    <>
+                                        <video
+                                            src={course.demoVideo}
+                                            poster={course.thumbnail || "/placeholder-course.jpg"}
+                                            controls
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </>
+                                ) : (
+                                    <>
+                                        <Image
+                                            src={course.thumbnail || "/placeholder-course.jpg"}
+                                            alt={course.title}
+                                            fill
+                                            className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-20 h-20 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center cursor-pointer group-hover:scale-110 transition-transform hover:bg-primary hover:text-primary-foreground backdrop-blur-sm">
+                                                <div className="w-0 h-0 border-t-10 border-t-transparent border-l-20 border-l-current border-b-10 border-b-transparent ml-2" />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </AnimatedSection>
                     </div>
@@ -136,10 +148,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                         <h3 className="text-3xl font-bold mb-6">Course Description</h3>
                                         <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
                                             <p>{course.description}</p>
-                                            <p className="mt-4">
-                                                This comprehensive course is designed to take you from basics to advanced concepts.
-                                                You will learn through practical examples, hands-on projects, and expert guidance.
-                                            </p>
                                         </div>
 
                                         <div className="grid md:grid-cols-2 gap-8 mt-12">
@@ -149,17 +157,26 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                                     What You'll Learn
                                                 </h4>
                                                 <ul className="space-y-3">
-                                                    {[
-                                                        "Master core concepts and principles",
-                                                        "Build real-world projects",
-                                                        "Industry-standard workflows",
-                                                        "Professional certification"
-                                                    ].map((item, i) => (
-                                                        <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                                                            <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                                                            <span>{item}</span>
-                                                        </li>
-                                                    ))}
+                                                    {course.information?.learningOutcomes && course.information.learningOutcomes.length > 0 ? (
+                                                        course.information.learningOutcomes.map((item: string, i: number) => (
+                                                            <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                                                                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                                                <span>{item}</span>
+                                                            </li>
+                                                        ))
+                                                    ) : (
+                                                        [
+                                                            "Master core concepts and principles",
+                                                            "Build real-world projects",
+                                                            "Industry-standard workflows",
+                                                            "Professional certification"
+                                                        ].map((item: string, i: number) => (
+                                                            <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                                                                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                                                <span>{item}</span>
+                                                            </li>
+                                                        ))
+                                                    )}
                                                 </ul>
                                             </div>
 
@@ -169,19 +186,46 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                                     Requirements
                                                 </h4>
                                                 <ul className="space-y-3">
-                                                    {[
-                                                        "Basic computer knowledge",
-                                                        "Passion for learning",
-                                                        "No prior experience needed"
-                                                    ].map((item, i) => (
+                                                    {course.information?.requirements && course.information.requirements.length > 0 ? (
+                                                        course.information.requirements.map((item: string, i: number) => (
+                                                            <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                                                                <span className="text-primary mt-1 font-bold">•</span>
+                                                                <span>{item}</span>
+                                                            </li>
+                                                        ))
+                                                    ) : (
+                                                        [
+                                                            "Basic computer knowledge",
+                                                            "Passion for learning",
+                                                            "No prior experience needed"
+                                                        ].map((item: string, i: number) => (
+                                                            <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                                                                <span className="text-primary mt-1 font-bold">•</span>
+                                                                <span>{item}</span>
+                                                            </li>
+                                                        ))
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        {/* What's Included Section */}
+                                        {course.information?.includes && course.information.includes.length > 0 && (
+                                            <div className="bg-card p-8 border border-primary/10 hover:border-primary/30 transition-colors mt-8">
+                                                <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                                    <span className="w-1 h-6 bg-primary inline-block mr-2"></span>
+                                                    What's Included
+                                                </h4>
+                                                <ul className="grid md:grid-cols-2 gap-3">
+                                                    {course.information.includes.map((item: string, i: number) => (
                                                         <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                                                            <span className="text-primary mt-1 font-bold">•</span>
+                                                            <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                                                             <span>{item}</span>
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
-                                        </div>
+                                        )}
                                     </AnimatedSection>
                                 </TabsContent>
 
@@ -197,15 +241,17 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                             <div className="w-32 h-32 bg-muted relative shrink-0 border-2 border-primary/20 overflow-hidden">
                                                 {/* Instructor Image Placeholder */}
                                                 <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-background flex items-center justify-center">
-                                                    <span className="text-2xl font-bold text-primary">YM</span>
+                                                    <span className="text-2xl font-bold text-primary">
+                                                        {course.instructorName ? course.instructorName.substring(0, 2).toUpperCase() : 'YM'}
+                                                    </span>
                                                 </div>
                                             </div>
                                             <div>
-                                                <h3 className="text-2xl font-bold mb-2">YieldMind Expert</h3>
-                                                <p className="text-primary font-accent text-sm uppercase tracking-wider mb-4">Senior Instructor</p>
+                                                <h3 className="text-2xl font-bold mb-2">
+                                                    {course.instructorName || 'YieldMind Expert'}
+                                                </h3>
                                                 <p className="text-muted-foreground leading-relaxed">
-                                                    Our courses are taught by industry veterans with over 10 years of experience in the field.
-                                                    They have worked with top global brands and bring real-world insights into the classroom.
+                                                    {course.instructorBio || 'Our courses are taught by industry veterans with over 10 years of experience in the field. They have worked with top global brands and bring real-world insights into the classroom.'}
                                                 </p>
                                             </div>
                                         </div>
@@ -223,6 +269,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                     </div>
                 </div>
             </section>
-        </main>
+        </main >
     );
 }
