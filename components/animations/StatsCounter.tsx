@@ -20,7 +20,7 @@ export function StatsCounter({
     duration = 2,
     suffix = "",
     prefix = "",
-    className = ""
+    className = "text-[2.56rem]"
 }: StatsCounterProps) {
     const counterRef = useRef<HTMLSpanElement>(null);
 
