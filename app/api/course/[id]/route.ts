@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/db";
 import type { CourseType } from "@prisma/client";
 

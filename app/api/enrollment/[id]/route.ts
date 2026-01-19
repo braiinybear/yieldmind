@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { ApiResponse } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 /**
  * DELETE /api/enrollment/[id]
  * Deletes a PENDING enrollment (allows user to retry)
