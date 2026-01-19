@@ -7,6 +7,7 @@ import { RootStoreProvider } from "@/zustand/root-store-provider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import LoadingScreen from "@/components/shared/LoadingScreen";
+import SmoothScroll from "@/components/shared/SmoothScroll";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,8 +57,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} ${montserrat.variable} antialiased min-h-screen flex flex-col`}
       >
+
         <SessionProvider>
           <RootStoreProvider>
+            <SmoothScroll />
             <LoadingScreen />
             <main className="flex-1">{children}</main>
           </RootStoreProvider>

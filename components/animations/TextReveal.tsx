@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, ReactNode } from "react";
 import { textReveal } from "@/lib/gsap-animations";
+import { useLoadingStore } from "@/zustand/stores/loading-store";
 
 interface TextRevealProps {
     children: ReactNode;
@@ -19,16 +20,17 @@ export function TextReveal({
     delay = 0
 }: TextRevealProps) {
     const textRef = useRef<HTMLDivElement>(null);
+    const isAppLoaded = useLoadingStore((state) => state.isAppLoaded);
 
     useEffect(() => {
-        if (textRef.current) {
+        if (textRef.current && isAppLoaded) {
             setTimeout(() => {
                 if (textRef.current) {
                     textReveal(textRef.current);
                 }
             }, delay * 1000);
         }
-    }, [delay]);
+    }, [delay, isAppLoaded]);
 
     return (
         <div ref={textRef} className={className} style={{ opacity: 0 }}>

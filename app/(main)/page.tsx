@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { HeroVideoBackground } from "@/components/hero/HeroVideoBackground";
 import { prisma } from "@/lib/db";
 import { CourseCard } from "@/components/shared/CourseCard";
 import { AnimatedSection } from "@/components/animations/AnimatedSection";
@@ -30,8 +31,12 @@ export default async function Home() {
           HERO SECTION - Full Viewport, Premium
           ============================================ */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-grid-premium">
-        {/* Background Gradient Overlay */}
-        <div className="absolute inset-0 bg-linear-to-b from-background via-background/95 to-background" />
+        {/* Background Video */}
+        <HeroVideoBackground />
+
+        {/* Background Gradient Overlay - Handled inside HeroVideoBackground for better blending, but we can keep additional top-level overlays if needed. 
+            For now, relying on component's overlay. */}
+
 
         {/* Animated Gold Accent Lines */}
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-50 z-10" />

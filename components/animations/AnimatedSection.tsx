@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, ReactNode } from "react";
 import { scrollAnimation } from "@/lib/gsap-animations";
+import { useLoadingStore } from "@/zustand/stores/loading-store";
 
 interface AnimatedSectionProps {
     children: ReactNode;
@@ -19,15 +20,16 @@ export function AnimatedSection({
     delay = 0
 }: AnimatedSectionProps) {
     const sectionRef = useRef<HTMLDivElement>(null);
+    const isAppLoaded = useLoadingStore((state) => state.isAppLoaded);
 
     useEffect(() => {
-        if (sectionRef.current) {
+        if (sectionRef.current && isAppLoaded) {
             scrollAnimation(sectionRef.current, { delay });
         }
-    }, [delay]);
+    }, [delay, isAppLoaded]);
 
     return (
-        <div ref={sectionRef} className={className} data-animate>
+        <div ref={sectionRef} className={className} data-animate style={{ opacity: 0 }}>
             {children}
         </div>
     );

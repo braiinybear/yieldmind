@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 
+import { useLoadingStore } from "@/zustand/stores/loading-store";
+
 export default function LoadingScreen() {
     const containerRef = useRef<HTMLDivElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
@@ -11,6 +13,7 @@ export default function LoadingScreen() {
     const progressRef = useRef<HTMLDivElement>(null);
     const counterRef = useRef<HTMLSpanElement>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+    const setAppLoaded = useLoadingStore((state) => state.setAppLoaded);
 
     useEffect(() => {
         // Prevent scrolling while loading
@@ -21,6 +24,7 @@ export default function LoadingScreen() {
                 onComplete: () => {
                     document.body.style.overflow = "auto";
                     setIsLoaded(true);
+                    setAppLoaded(true);
                 }
             });
 
