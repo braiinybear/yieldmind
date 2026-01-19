@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { animateCounter } from "@/lib/gsap-animations";
+import { useLoadingStore } from "@/zustand/stores/loading-store";
 
 interface StatsCounterProps {
     endValue: number;
@@ -20,12 +21,13 @@ export function StatsCounter({
     duration = 2,
     suffix = "",
     prefix = "",
-    className = "text-[2.56rem]"
+    className = "text-[2.45rem] tabular-nums inline-block leading-normal"
 }: StatsCounterProps) {
     const counterRef = useRef<HTMLSpanElement>(null);
+    const isAppLoaded = useLoadingStore((state) => state.isAppLoaded);
 
     useEffect(() => {
-        if (counterRef.current) {
+        if (counterRef.current && isAppLoaded) {
             // Set initial value
             counterRef.current.textContent = "0";
 
@@ -46,7 +48,7 @@ export function StatsCounter({
 
             return () => observer.disconnect();
         }
-    }, [endValue, duration]);
+    }, [endValue, duration, isAppLoaded]);
 
     return (
         <span className={className}>

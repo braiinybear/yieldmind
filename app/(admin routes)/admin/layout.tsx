@@ -92,25 +92,24 @@ export default function AdminLayout({
 
       {/* Sidebar - Fixed */}
       <aside
-        className={`${
-          isMobile
+        className={`${isMobile
             ? sidebarOpen
               ? "translate-x-0"
               : "-translate-x-full"
             : "translate-x-0"
-        } fixed md:static md:translate-x-0 h-screen z-50 w-64 bg-linear-to-b from-slate-900 to-slate-800 text-gray-100 flex flex-col transition-transform duration-300 ease-in-out md:transition-none shadow-2xl md:shadow-lg`}
+          } fixed md:static md:translate-x-0 h-screen z-50 w-64 bg-linear-to-b from-slate-900 to-slate-800 text-gray-100 flex flex-col transition-transform duration-300 ease-in-out md:transition-none shadow-2xl md:shadow-lg`}
       >
         {/* Logo Section */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
           <div className="flex items-center mb-[-30] mt-[-30]">
-           <Link href="/">
-            <Image
-              src="/logo.png"
-              height={150}
-              width={150}
-              alt="YieldMind"
-              className="rounded-lg block"
-            /></Link>
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                height={150}
+                width={150}
+                alt="YieldMind"
+                className="rounded-lg block"
+              /></Link>
           </div>
 
           <button
@@ -139,10 +138,9 @@ export default function AdminLayout({
                 className={`
                   flex items-center gap-3 px-3 md:px-4 py-3 rounded-lg
                   transition-all duration-200 ease-in-out min-h-11 md:min-h-auto
-                  ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                      : "text-gray-300 hover:bg-slate-700 hover:text-white"
+                  ${isActive
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
+                    : "text-gray-300 hover:bg-slate-700 hover:text-white"
                   }
                 `}
               >
@@ -167,7 +165,7 @@ export default function AdminLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen w-full md:w-auto overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white border-b border-slate-200 px-4 md:px-8 py-3 md:py-4 shadow-sm flex-shrink-0">
+        <div className="bg-white border-b border-slate-200 px-4 md:px-8 py-3 md:py-4 shadow-sm shrink-0">
           <div className="flex items-center justify-between gap-4">
             {isMobile && !sidebarOpen && (
               <button
@@ -189,7 +187,10 @@ export default function AdminLayout({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
+        <div
+          className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8"
+          data-lenis-prevent
+        >
           <div className="max-w-7xl mx-auto">{children}</div>
         </div>
       </main>

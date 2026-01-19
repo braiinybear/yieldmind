@@ -9,14 +9,16 @@ import { useLoadingStore } from "@/zustand/stores/loading-store";
 export default function LoadingScreen() {
     const containerRef = useRef<HTMLDivElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
+    const textWrapperRef = useRef<HTMLDivElement>(null);
+    const capabilitiesRef = useRef<HTMLDivElement>(null);
     const progressRef = useRef<HTMLDivElement>(null);
     const counterRef = useRef<HTMLSpanElement>(null);
+    const bgOrbsRef = useRef<HTMLDivElement>(null);
+
     const [isLoaded, setIsLoaded] = useState(false);
     const setAppLoaded = useLoadingStore((state) => state.setAppLoaded);
 
     useEffect(() => {
-        // Prevent scrolling while loading
         document.body.style.overflow = "hidden";
 
         const ctx = gsap.context(() => {
@@ -28,117 +30,160 @@ export default function LoadingScreen() {
                 }
             });
 
-            // Initial State
-            gsap.set(logoRef.current, { y: 30, opacity: 0, scale: 0.9 });
-            gsap.set(textRef.current, { y: 20, opacity: 0 });
+            // Initial Setup
+            gsap.set(logoRef.current, { scale: 3, filter: "blur(20px)", opacity: 0, force3D: true });
+            gsap.set(textWrapperRef.current, { y: 50, opacity: 0 });
+            gsap.set(capabilitiesRef.current?.children || [], { y: 20, opacity: 0 });
             gsap.set(progressRef.current, { scaleX: 0 });
 
-            // Counter Object for animation
+            // Background Animation (Continuous)
+            gsap.to(".orb", {
+                y: "random(-50, 50)",
+                x: "random(-50, 50)",
+                scale: "random(0.8, 1.2)",
+                duration: "random(3, 5)",
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+
             const counter = { value: 0 };
 
-            // Animation Sequence
             tl
-                // 1. Logo & Text Entrance
+                // 1. Cinematic Logo Focus Pull
                 .to(logoRef.current, {
-                    y: 0,
                     scale: 1,
+                    filter: "blur(0px)",
                     opacity: 1,
-                    duration: 1.2,
-                    ease: "power4.out"
+                    duration: 1.5,
+                    ease: "expo.out",
                 })
-                .to(textRef.current, {
+
+                // 2. Text Reveal
+                .to(textWrapperRef.current, {
                     y: 0,
                     opacity: 1,
                     duration: 1,
                     ease: "power3.out"
+                }, "-=1")
+
+                // 3. Capabilities Stagger
+                .to(capabilitiesRef.current?.children || [], {
+                    y: 0,
+                    opacity: 1,
+                    stagger: 0.2,
+                    duration: 0.8,
+                    ease: "power2.out"
                 }, "-=0.8")
 
-                // 2. Progress Bar & Counter
+                // 4. Progress & Counter
+                .to(".progress-area", {
+                    opacity: 1,
+                    duration: 1,
+                    ease: "power2.out"
+                }, "-=1.5")
                 .to(progressRef.current, {
                     scaleX: 1,
-                    duration: 1.5,
-                    ease: "power2.inOut"
-                }, "-=0.5")
+                    duration: 2,
+                    ease: "expo.inOut"
+                }, "<")
                 .to(counter, {
                     value: 100,
-                    duration: 1.5,
-                    ease: "power2.inOut",
+                    duration: 2,
+                    ease: "expo.inOut",
                     onUpdate: () => {
                         if (counterRef.current) {
                             counterRef.current.innerText = Math.round(counter.value).toString();
                         }
                     }
-                }, "<") // Sync with progress bar
+                }, "<")
 
-                // 3. Exit Animation
-                .to([logoRef.current, textRef.current, progressRef.current, counterRef.current, ".loading-extras"], {
+                // 5. Cinematic Exit
+                .to([logoRef.current, textWrapperRef.current, capabilitiesRef.current, ".progress-area"], {
                     opacity: 0,
-                    y: -30,
-                    duration: 0.6,
-                    ease: "back.in(1.7)",
-                    delay: 0.2
+                    scale: 0.9,
+                    filter: "blur(10px)",
+                    duration: 0.8,
+                    ease: "power2.in",
+                    stagger: 0.05
                 })
                 .to(containerRef.current, {
                     yPercent: -100,
-                    duration: 1,
+                    duration: 1.2,
                     ease: "power4.inOut"
-                });
+                }, "-=0.4");
 
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [setAppLoaded]);
 
     if (isLoaded) return null;
 
     return (
         <div
             ref={containerRef}
-            className="fixed inset-0 z-9999 bg-[#050C16] flex items-center justify-center overflow-hidden"
+            className="fixed inset-0 z-9999 bg-[#030712] flex flex-col items-center justify-center overflow-hidden"
+            style={{ willChange: 'transform' }}
         >
-            {/* Ambient Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 blur-[100px] rounded-full pointer-events-none loading-extras opacity-0 animate-in fade-in duration-1000" />
+            {/* Dynamic Background */}
+            <div ref={bgOrbsRef} className="absolute inset-0 opacity-30 pointer-events-none">
+                <div className="orb absolute top-[20%] left-[20%] w-[500px] h-[500px] bg-primary/20 blur-[100px] rounded-full mix-blend-screen" />
+                <div className="orb absolute bottom-[20%] right-[20%] w-[600px] h-[600px] bg-blue-500/10 blur-[120px] rounded-full mix-blend-screen" />
+                <div className="orb absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 blur-[150px] rounded-full mix-blend-screen" />
+            </div>
 
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-grid-premium opacity-10 pointer-events-none" />
+            {/* Grid Pattern with Vignette */}
+            <div className="absolute inset-0 bg-grid-premium opacity-[0.03]" />
+            <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#030712]/50 to-[#030712]" />
 
-            <div className="relative z-10 flex flex-col items-center">
-                {/* Logo Wrapper */}
-                <div ref={logoRef} className="relative w-32 h-32 mb-8 opacity-0">
-                    <Image
-                        src="/logo.png"
-                        alt="YieldMind Academy"
-                        fill
-                        className="object-contain drop-shadow-2xl"
-                        priority
-                    />
-                </div>
+            <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-4xl px-4 min-h-screen pb-32">
 
-                {/* Text */}
-                <div ref={textRef} className="text-center space-y-3 opacity-0">
-                    <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-                        YieldMind <span className="text-gold-gradient">Academy</span>
-                    </h1>
-                    <p className="text-primary/60 font-accent text-sm uppercase tracking-[0.3em]">
-                        Empowering Creators
-                    </p>
-                </div>
-
-                {/* Progress Container */}
-                <div className="mt-12 flex flex-col items-center gap-4 w-64 loading-extras">
-                    {/* Bar */}
-                    <div className="w-full h-0.5 bg-primary/10 rounded-full overflow-hidden">
-                        <div
-                            ref={progressRef}
-                            className="h-full w-full bg-gold-gradient origin-left scale-x-0 shadow-[0_0_10px_rgba(212,175,55,0.5)]"
+                {/* Logo Section */}
+                <div className="relative mb-12">
+                    <div ref={logoRef} className="relative w-40 h-40 md:w-56 md:h-56 opacity-0">
+                        <Image
+                            src="/logo.png"
+                            alt="YieldMind"
+                            fill
+                            className="object-contain drop-shadow-[0_0_30px_rgba(212,175,55,0.3)]"
+                            priority
                         />
+                        {/* Shine Effect */}
+                        <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/10 to-transparent skew-x-12 translate-x-[-150%] animate-shine opacity-50" />
                     </div>
+                </div>
 
-                    {/* Percentage */}
-                    <div className="font-mono text-xs text-primary/80">
+                {/* Typography */}
+                <div ref={textWrapperRef} className="text-center space-y-6 opacity-0">
+                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-white to-white/50">
+                        YIELDMIND
+                    </h1>
+                    <div className="h-px w-24 mx-auto bg-linear-to-r from-transparent via-primary to-transparent opacity-50" />
+                </div>
+
+                {/* Rotating Capabilities */}
+                <div ref={capabilitiesRef} className="flex gap-4 md:gap-8 mt-6 text-sm md:text-base font-accent uppercase tracking-[0.2em] text-primary/60 opacity-0">
+                    <span>Learn</span>
+                    <span className="text-primary/30">•</span>
+                    <span>Grow</span>
+                    <span className="text-primary/30">•</span>
+                    <span>Succeed</span>
+                </div>
+
+                {/* Footer Progress */}
+                <div className="progress-area absolute bottom-12 md:bottom-16 left-0 w-full flex flex-col items-center gap-4 opacity-0">
+                    <div className="font-mono text-4xl md:text-6xl font-bold text-white/50 tabular-nums">
                         <span ref={counterRef}>0</span>%
                     </div>
+                    <div className="w-full max-w-md h-px bg-white/5 relative overflow-hidden">
+                        <div
+                            ref={progressRef}
+                            className="absolute inset-0 bg-gold-gradient shadow-[0_0_20px_rgba(212,175,55,0.5)]"
+                        />
+                    </div>
                 </div>
+
             </div>
         </div>
     );
