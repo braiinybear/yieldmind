@@ -22,7 +22,18 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         ? await getEnrollmentStatus(course.id, session.user.id)
         : null;
 
-    const isEnrolled = enrollment?.status === "ACTIVE" || enrollment?.status === "COMPLETED";
+    const getHalfText = (text: string) => {
+        let length = text.length;
+        let half = Math.round(length / 2);
+        let halfstr = text.slice(0, half);
+        const lastStop = halfstr.lastIndexOf(".");
+        if (lastStop === -1) {
+            return text.slice(0, half);
+        }
+        return text.slice(0, lastStop + 1);
+    }
+
+    // const isEnrolled = enrollment?.status === "ACTIVE" || enrollment?.status === "COMPLETED";
 
     return (
         <main className="min-h-screen bg-background">
@@ -51,7 +62,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                 </h1>
 
                                 <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                                    {course.shortDescription || course.description}
+                                    {course.shortDescription || getHalfText(course.description)}
                                 </p>
 
                                 <div className="flex flex-wrap gap-y-4 gap-x-8 text-sm font-accent text-white/80 pt-4">
@@ -208,24 +219,6 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                                 </ul>
                                             </div>
                                         </div>
-
-                                        {/* What's Included Section */}
-                                        {course.information?.includes && course.information.includes.length > 0 && (
-                                            <div className="bg-card p-8 border border-primary/10 hover:border-primary/30 transition-colors mt-8">
-                                                <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
-                                                    <span className="w-1 h-6 bg-primary inline-block mr-2"></span>
-                                                    What's Included
-                                                </h4>
-                                                <ul className="grid md:grid-cols-2 gap-3">
-                                                    {course.information.includes.map((item: string, i: number) => (
-                                                        <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                                                            <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                                                            <span>{item}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
                                     </AnimatedSection>
                                 </TabsContent>
 

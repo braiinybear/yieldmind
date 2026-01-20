@@ -97,22 +97,33 @@ export default function EnrollmentCard({ course, enrollment }: EnrollmentCardPro
                     <div className="space-y-6 pt-6 border-t border-border">
                         <h4 className="font-bold text-lg">This Course Includes:</h4>
                         <ul className="space-y-4">
-                            <li className="flex items-center gap-3 text-muted-foreground">
-                                <PlayCircle className="h-5 w-5 text-primary" />
-                                <span>12+ Hours of Video Content</span>
-                            </li>
-                            <li className="flex items-center gap-3 text-muted-foreground">
-                                <Clock className="h-5 w-5 text-primary" />
-                                <span>Full Lifetime Access</span>
-                            </li>
-                            <li className="flex items-center gap-3 text-muted-foreground">
-                                <Award className="h-5 w-5 text-primary" />
-                                <span>Certificate of Completion</span>
-                            </li>
-                            <li className="flex items-center gap-3 text-muted-foreground">
-                                <CheckCircle className="h-5 w-5 text-primary" />
-                                <span>Access on Mobile and TV</span>
-                            </li>
+                            {course.information?.includes && course.information.includes.length > 0 ? (
+                                course.information.includes.map((item: string, i: number) => (
+                                    <li key={i} className="flex items-center gap-3 text-muted-foreground">
+                                        <CheckCircle className="h-5 w-5 text-primary" />
+                                        <span>{item}</span>
+                                    </li>
+                                ))
+                            ) : (
+                                <>
+                                    <li className="flex items-center gap-3 text-muted-foreground">
+                                        <PlayCircle className="h-5 w-5 text-primary" />
+                                        <span>12+ Hours of Video Content</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-muted-foreground">
+                                        <Clock className="h-5 w-5 text-primary" />
+                                        <span>Full Lifetime Access</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-muted-foreground">
+                                        <Award className="h-5 w-5 text-primary" />
+                                        <span>Certificate of Completion</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-muted-foreground">
+                                        <CheckCircle className="h-5 w-5 text-primary" />
+                                        <span>Access on Mobile and TV</span>
+                                    </li>
+                                </>
+                            )}
                         </ul>
                     </div>
                 </div>
