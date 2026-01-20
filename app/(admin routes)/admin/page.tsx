@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 // app/(admin)/admin/page.tsx
 export default function AdminDashboardPage() {
+   const fetchCourses = useCourseStore((state) => state.fetchCourses);
   const  courseData = useCourseStore((state) => state.courseData);
   const [studentCount,setStudentCount] = useState<number>(0);
   useEffect(()=>{
@@ -13,8 +14,9 @@ export default function AdminDashboardPage() {
     
     setStudentCount(students.data.length)
    }
+   fetchCourses()
    fecthStudents()
-  },[])
+  },[fetchCourses])
   return (
     <div className="space-y-4 text-black">
       {/* Stats Cards */}
