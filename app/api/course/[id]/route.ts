@@ -52,6 +52,7 @@ export async function GET(
             order: "asc",
           },
         },
+        information: true,
       },
     });
 

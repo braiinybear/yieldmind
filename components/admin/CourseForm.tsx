@@ -26,13 +26,22 @@ export interface CourseFormData {
   learningOutcomes: string[];
   requirements: string[];
 }
-
-interface CourseWithModules extends Course {
+interface CourseInformation {
+  id: string;
+  courseId: string;
+  includes: string[];
+  learningOutcomes: string[];
+  requirements: string[];
+  createdAt: string;
+  updatedAt: string; 
+}
+interface CourseWithModulesAndInformation extends Course {
   modules?: CourseModule[];
+   information?: CourseInformation;
 }
 
 interface CourseFormProps {
-  course?: CourseWithModules;
+  course?: CourseWithModulesAndInformation;
   onClose: () => void;
 }
 
@@ -125,9 +134,9 @@ export default function CourseForm({
       : "",
     batchSize: course?.batchSize?.toString() || "",
     duration: course?.duration || "",
-    includes: [],
-    learningOutcomes: [],
-    requirements: [],
+    includes: course?.information?.includes || [],
+    learningOutcomes:course?.information?.learningOutcomes || [],
+    requirements:course?.information?.requirements || [],
   }));
 
   const [modules, setModules] = useState<CourseModule[]>([]);
@@ -621,7 +630,7 @@ export default function CourseForm({
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-medium text-slate-700">
-                    What's Included
+                    What&apos;s Included
                   </label>
                   <button
                     type="button"
@@ -635,7 +644,7 @@ export default function CourseForm({
                 <div className="space-y-2">
                   {formData.includes.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center py-2">
-                      No items added. Click "Add Item" to add what's included in this course.
+                      No items added. Click &quot;Add Item&quot; to add what&apos;s included in this course.
                     </p>
                   ) : (
                     formData.includes.map((item, index) => (
@@ -678,7 +687,7 @@ export default function CourseForm({
                 <div className="space-y-2">
                   {formData.learningOutcomes.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center py-2">
-                      No outcomes added. Click "Add Outcome" to add what students will learn.
+                      No outcomes added. Click &quot;Add Outcome&quot; to add what students will learn.
                     </p>
                   ) : (
                     formData.learningOutcomes.map((item, index) => (
@@ -721,7 +730,7 @@ export default function CourseForm({
                 <div className="space-y-2">
                   {formData.requirements.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center py-2">
-                      No requirements added. Click "Add Requirement" to add prerequisites.
+                      No requirements added. Click &quot;Add Requirement&quot; to add prerequisites.
                     </p>
                   ) : (
                     formData.requirements.map((item, index) => (
@@ -773,7 +782,7 @@ export default function CourseForm({
                 </div>
               ) : modules.length === 0 ? (
                 <p className="text-sm text-slate-500 text-center py-4">
-                  No modules added yet. Click &ldquo;Add Module&rdquo; to get
+                  No modules added yet. Click &quot;Add Module&quot; to get
                   started.
                 </p>
               ) : (
@@ -854,7 +863,7 @@ export default function CourseForm({
 
                           {module.lessons.length === 0 ? (
                             <p className="text-xs text-slate-500 text-center py-2">
-                              No lessons added. Click &ldquo;Add Lesson&rdquo;
+                              No lessons added. Click &quot;Add Lesson&quot;
                               to add one.
                             </p>
                           ) : (

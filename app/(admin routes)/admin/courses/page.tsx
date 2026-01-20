@@ -39,8 +39,6 @@ export default function AdminCoursePage() {
 
   const fetchCourses = useCourseStore((state) => state.fetchCourses);
   const fetchloading = useCourseStore((state) => state.loading.fetch);
-  const createloading = useCourseStore((state) => state.loading.create);
-  const updateLoading = useCourseStore((state) => state.loading.update);
   const deleteLoading = useCourseStore((state) => state.loading.delete);
   const deleteCourse = useCourseStore((state) => state.deleteCourse);
 
