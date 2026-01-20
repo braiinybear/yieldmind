@@ -16,6 +16,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { useCourseStore } from "@/zustand/root-store-provider";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -33,8 +34,9 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const pathname = usePathname();
-
+   const fetchCourses = useCourseStore((state) => state.fetchCourses);
   useEffect(() => {
+    fetchCourses()
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
@@ -46,7 +48,7 @@ export default function AdminLayout({
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [fetchCourses]);
 
   // Get page title and description based on current route
   const getPageTitle = () => {
