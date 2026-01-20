@@ -32,20 +32,10 @@ export default function MobileNav({ user }: MobileNavProps) {
                     </Button>
                 </SheetTrigger>
 
-                <SheetContent side="right" className="w-[300px] border-l border-border bg-background sm:w-[350px]">
+                <SheetContent side="right" className="w-75 border-l border-border bg-background sm:w-87.5">
                     <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
 
-                    <div className="flex flex-col gap-6 mt-6">
-                        {/* Mobile Logo */}
-                        <div className="flex items-center gap-2">
-                            <Image
-                                src="/logo.png"
-                                alt="YieldMind Logo"
-                                width={140}
-                                height={40}
-                                className="w-32 h-auto object-contain"
-                            />
-                        </div>
+                    <div className="flex flex-col gap-6 mt-20 p-4">
 
                         {/* Links */}
                         <div className="flex flex-col gap-4">

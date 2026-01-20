@@ -15,16 +15,22 @@ interface Lesson {
 
 export async function POST(req: Request) {
   try {
-    const { course, modules } = await req.json();
-    console.log(course);
+    const { course, modules,information } = await req.json();
+    console.log("information",information);
+    console.log("course",course)
+    console.log("modules",modules)
     
 
     const createdCourse = await prisma.course.create({
       data: {
         title: course.title,
         slug: course.slug,
+        shortDescription:course.shortDescription,
         description: course.description,
         thumbnail: course.thumbnail || null,
+        demoVideo:course.demoVideo,
+        instructorName:course.instructorName,
+        instructorBio:course.instructorBio,
         price: course.price,
         type: course.type,
         venue: course.venue || null,
@@ -57,6 +63,17 @@ export async function POST(req: Request) {
           })),
         });
       }
+    }
+
+    if(information){
+      await prisma.courseInformation.create({
+        data:{
+          courseId: createdCourse.id,
+          includes: information.includes || [],
+          learningOutcomes: information.learningOutcomes || [],
+          requirements: information.requirements || [],
+        }
+      })
     }
 
     return NextResponse.json(

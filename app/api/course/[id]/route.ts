@@ -21,15 +21,18 @@ interface CourseUpdateData {
   price: number;
   type: CourseType;
   venue: string | null;
+  shortDescription:string,
   startDate: Date | null;
   batchSize: number;
   duration: string | null;
   slug?: string;
+  instructorName: string;
+  instructorBio: string;
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -53,28 +56,22 @@ export async function GET(
     });
 
     if (!course) {
-      return NextResponse.json(
-        { error: "Course not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { success: true, data: course },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: course }, { status: 200 });
   } catch (error) {
     console.error("GET COURSE ERROR:", error);
     return NextResponse.json(
       { error: "Failed to fetch course" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -82,11 +79,11 @@ export async function PUT(
     if (!id) {
       return NextResponse.json(
         { error: "Course ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { course, modules } = await req.json();
+    const { course, modules, information } = await req.json();
 
     // Fetch existing course to check if slug has changed
     const existingCourse = await prisma.course.findUnique({
@@ -94,10 +91,7 @@ export async function PUT(
     });
 
     if (!existingCourse) {
-      return NextResponse.json(
-        { error: "Course not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
     // Build update data, only including slug if it's different
@@ -107,6 +101,9 @@ export async function PUT(
       thumbnail: course.thumbnail || null,
       price: course.price,
       type: course.type,
+        shortDescription:course.shortDescription,
+      instructorName: course.instructorName,
+      instructorBio: course.instructorBio,
       venue: course.venue || null,
       startDate: course.startDate ? new Date(course.startDate) : null,
       batchSize: course.batchSize,
@@ -156,22 +153,51 @@ export async function PUT(
       }
     }
 
+    // Handle course information update
+    if (information) {
+      const existingInfo = await prisma.courseInformation.findUnique({
+        where: { courseId: id },
+      });
+
+      if (existingInfo) {
+        // Update existing information
+        await prisma.courseInformation.update({
+          where: { courseId: id },
+          data: {
+            includes: information.includes || [],
+            learningOutcomes: information.learningOutcomes || [],
+            requirements: information.requirements || [],
+          },
+        });
+      } else {
+        // Create new information
+        await prisma.courseInformation.create({
+          data: {
+            courseId: id,
+            includes: information.includes || [],
+            learningOutcomes: information.learningOutcomes || [],
+            requirements: information.requirements || [],
+          },
+        });
+      }
+    }
+
     return NextResponse.json(
       { success: true, courseId: updatedCourse.id },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("UPDATE COURSE ERROR:", error);
     return NextResponse.json(
       { error: "Failed to update course" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -179,7 +205,7 @@ export async function DELETE(
     if (!id) {
       return NextResponse.json(
         { error: "Course ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -189,13 +215,13 @@ export async function DELETE(
 
     return NextResponse.json(
       { success: true, message: "Course deleted successfully" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("DELETE COURSE ERROR:", error);
     return NextResponse.json(
       { error: "Failed to delete course" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
