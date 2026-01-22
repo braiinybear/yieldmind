@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from 'react'
 import { useStore } from 'zustand'
 
-import { CourseStore, CourseStoreType } from '@/zustand/stores/course-store'
+import { CourseStore, CourseStoreType } from '@/zustand/stores/admin-store/course-store'
 
 /* ---------- Store Types ---------- */
 
