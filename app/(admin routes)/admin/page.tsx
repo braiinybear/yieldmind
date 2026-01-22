@@ -45,27 +45,27 @@ export default function AdminDashboardPage() {
   }, [fetchCourses]);
 
   return (
-    <div className="space-y-4 text-black">
+    <div className="space-y-4 text-black font-sans">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow">
           <p className="text-gray-500">Total Courses</p>
-          <h3 className="text-2xl font-bold">{courseData?.length}</h3>
+          <h3 className="text-2xl font-medium font-sans">{courseData?.length}</h3>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
           <p className="text-gray-500">Total Students</p>
-          <h3 className="text-2xl font-bold">{studentCount}</h3>
+          <h3 className="text-2xl font-medium font-sans">{studentCount}</h3>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
           <p className="text-gray-500">Active Enrollments</p>
-          <h3 className="text-2xl font-bold">{enrollmentCount}</h3>
+          <h3 className="text-2xl font-medium font-sans">{enrollmentCount}</h3>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
           <p className="text-gray-500">Revenue</p>
-          <h3 className="text-2xl font-bold">{revenue}</h3>
+          <h3 className="text-2xl font-medium font-sans">{revenue}</h3>
         </div>
       </div>
 
