@@ -8,38 +8,41 @@ datasource db {
 }
 
 model Course {
-  id          String        @id @default(uuid()) // ✅ Added Auto-ID
-  title       String
-  slug        String        @unique
+  id               String             @id @default(uuid()) // ✅ Added Auto-ID
+  title            String
+  slug             String             @unique
   shortDescription String?
-  description String
-  instructorName String?
-  instructorBio  String?
-  thumbnail   String?
-  demoVideo   String?
-  price       Float
-  difficulty  DifficultyLevel @default(BEGINNER)
-  type        CourseType    @default(OFFLINE)
-  venue       String?
-  startDate   DateTime?
-  batchSize   Int?
-  duration    String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt           // ✅ Added Auto-Update
-  modules CourseModule[]
-  Enrollment  Enrollment[]
-  information CourseInformation?
+  description      String
+  creatorId        String?
+  creator          User?          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  status           CourseStatus       @default(DRAFT)
+  thumbnail        String?
+  demoVideo        String?
+  price            Float
+  difficulty       DifficultyLevel    @default(BEGINNER)
+  type             CourseType         @default(OFFLINE)
+  venue            String?
+  startDate        DateTime?
+  batchSize        Int?
+  duration         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt // ✅ Added Auto-Update
+  modules          CourseModule[]
+  Enrollment       Enrollment[]
+  information      CourseInformation?
+
+  @@index([status])
 }
 
 model CourseInformation {
-  id    String @id @default(uuid())
-  courseId String
-  Course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid())
+  courseId         String
+  Course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   includes         String[]
   learningOutcomes String[]
   requirements     String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@unique([courseId])
 }
@@ -50,11 +53,11 @@ model CourseModule {
   order    Int
   courseId String
   Course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons   Lesson[]
+  lessons  Lesson[]
 }
 
 model Enrollment {
-  id                String   @id @default(uuid()) // ✅ Added Auto-ID
+  id                String           @id @default(uuid()) // ✅ Added Auto-ID
   userId            String
   courseId          String
   status            EnrollmentStatus @default(PENDING)
@@ -62,7 +65,7 @@ model Enrollment {
   razorpayOrderId   String?          @unique
   razorpayPaymentId String?          @unique
   enrolledAt        DateTime         @default(now())
-  Course            Course           @relation(fields: [courseId], references: [id],onDelete: Cascade)
+  Course            Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   User              User             @relation(fields: [userId], references: [id])
 
   @@index([courseId])
@@ -80,18 +83,93 @@ model Lesson {
   CourseModule CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id        String   @id @default(uuid()) // ✅ Added Auto-ID
-  name      String
-  email     String   @unique
-  password  String?
-  phone     String?
-  role      Role     @default(STUDENT)
+model Employee {
+  id String @id @default(uuid())
+
+  userId String @unique
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  employeeCode   String         @unique // EMP001, EMP002
+  designation    String // Backend Developer, Trainer, etc.
+  department     String?
+  dateOfJoining  DateTime       @default(now())
+  salary         Float?
+  employmentType EmploymentType @default(FULL_TIME)
+
+  resumeUrl     String?
+  qualification String?
+  experience    Int?
+
+  status EmployeeStatus @default(ACTIVE)
+
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt           // ✅ Added Auto-Update
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id         String       @id @default(uuid())
+  name       String
+  email      String       @unique
+  password   String?
+  phone      String?
+  role       Role         @default(STUDENT)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
   Enrollment Enrollment[]
+  employee   Employee?
+
+  jobPositions    JobPosition[] // if admin created
+  jobApplications JobApplication[] // if user applied
+  Course          Course[]
 
   @@index([email])
+}
+
+model JobPosition {
+  id                 String         @id @default(uuid())
+  title              String
+  description        String
+  department         String?
+  location           String?
+  employmentType     EmploymentType @default(FULL_TIME)
+  experienceRequired Int?
+  salaryRange        String?
+  isActive           Boolean        @default(true)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  applications JobApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JobApplication {
+  id String @id @default(uuid())
+
+  userId String
+  jobId  String
+
+  fullName String
+  email    String
+  phone    String
+
+  qualification String
+  experience    Int?
+  skills        String[]
+  resumeUrl     String // uploaded resume (PDF)
+  coverLetter   String?
+
+  status ApplicationStatus @default(APPLIED)
+
+  User        User        @relation(fields: [userId], references: [id])
+  JobPosition JobPosition @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  appliedAt DateTime @default(now())
+
+  @@unique([userId, jobId]) // user applies once only
+  @@index([jobId])
 }
 
 enum CourseType {
@@ -110,11 +188,38 @@ enum EnrollmentStatus {
 enum Role {
   STUDENT
   ADMIN
-  TEACHER
+  EMPLOYEE
 }
 
 enum DifficultyLevel {
   BEGINNER
   INTERMEDIATE
   ADVANCED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  CONTRACT
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  RESIGNED
+  TERMINATED
+}
+
+enum CourseStatus {
+  DRAFT // employee working on it
+  PENDING // submitted for admin review
+  PUBLISHED // visible to users
 }
