@@ -237,16 +237,16 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                                 {/* Instructor Image Placeholder */}
                                                 <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-background flex items-center justify-center">
                                                     <span className="text-2xl font-bold text-primary">
-                                                        {course.instructorName ? course.instructorName.substring(0, 2).toUpperCase() : 'YM'}
+                                                        {course.creatorId ? course.creatorId.substring(0, 2).toUpperCase() : 'YM'}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div>
                                                 <h3 className="text-2xl font-bold mb-2">
-                                                    {course.instructorName || 'YieldMind Expert'}
+                                                    {course.creatorId || 'YieldMind Expert'}
                                                 </h3>
                                                 <p className="text-muted-foreground leading-relaxed">
-                                                    {course.instructorBio || 'Our courses are taught by industry veterans with over 10 years of experience in the field. They have worked with top global brands and bring real-world insights into the classroom.'}
+                                                    {course.creatorId || 'Our courses are taught by industry veterans with over 10 years of experience in the field. They have worked with top global brands and bring real-world insights into the classroom.'}
                                                 </p>
                                             </div>
                                         </div>
