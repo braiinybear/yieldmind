@@ -13,8 +13,10 @@ model Course {
   slug             String             @unique
   shortDescription String?
   description      String
+  instructorName   String?
+  instructorBio    String?
   creatorId        String?
-  creator          User?          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creator          User?              @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   status           CourseStatus       @default(DRAFT)
   thumbnail        String?
   demoVideo        String?

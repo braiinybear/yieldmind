@@ -47,7 +47,7 @@ export async function GET() {
             slug: true,
             price: true,
             type: true,
-            // instructorName: true,
+            instructorName: true,
           },
         },
       },
