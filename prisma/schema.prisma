@@ -62,7 +62,7 @@ model Enrollment {
   razorpayOrderId   String?          @unique
   razorpayPaymentId String?          @unique
   enrolledAt        DateTime         @default(now())
-  Course            Course           @relation(fields: [courseId], references: [id])
+  Course            Course           @relation(fields: [courseId], references: [id],onDelete: Cascade)
   User              User             @relation(fields: [userId], references: [id])
 
   @@index([courseId])

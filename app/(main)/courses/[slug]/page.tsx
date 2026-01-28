@@ -23,9 +23,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         : null;
 
     const getHalfText = (text: string) => {
-        let length = text.length;
-        let half = Math.round(length / 2);
-        let halfstr = text.slice(0, half);
+        const length:number = text.length;
+        const half:number = Math.round(length / 2);
+        const halfstr = text.slice(0, half);
         const lastStop = halfstr.lastIndexOf(".");
         if (lastStop === -1) {
             return text.slice(0, half);
@@ -36,12 +36,15 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     // const isEnrolled = enrollment?.status === "ACTIVE" || enrollment?.status === "COMPLETED";
 
     return (
-        <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background">
+
             {/* Split Hero Section */}
-            <section className="relative bg-[#050C16] border-b border-primary/10 overflow-hidden">
+             <section className="relative bg-[#050C16] border-b border-primary/10">
                 {/* Background Effects */}
                 <div className="absolute inset-0 bg-grid-premium opacity-10" />
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
+             <div className="absolute top-0 right-0 w-1/2 max-w-[50vw] h-full bg-primary/5 blur-3xl rounded-full -translate-y-1/2 pointer-events-none" />
+
+
 
                 <div className="container-premium py-20 lg:py-28 relative z-10">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -126,28 +129,27 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             {/* Content Section */}
             <section className="section-padding relative z-10">
                 <div className="container-premium px-4">
-                    <div className="grid lg:grid-cols-3 gap-12">
-
+                  <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content Column */}
-                        <div className="lg:col-span-2">
+                    <div className="col-span-1 lg:col-span-2 w-full max-w-full">
                             <Tabs defaultValue="overview" className="w-full">
                                 <AnimatedSection delay={0.3}>
-                                    <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 mb-12 rounded-none h-auto">
+                                 <TabsList className="w-full grid grid-cols-1 md:grid-cols-3 justify-start border-b border-border bg-transparent p-0 mb-6 sm:mb-12 rounded-none h-auto">
                                         <TabsTrigger
                                             value="overview"
-                                            className="rounded-none border-b-2 border-transparent px-8 py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
+                                            className="rounded-none border-b-2 border-transparent px-3 sm:px-6 lg:px-8 py-3 sm:py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
                                         >
                                             Overview
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="curriculum"
-                                            className="rounded-none border-b-2 border-transparent px-8 py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
+                                            className="rounded-none border-b-2 border-transparent px-3 sm:px-6 lg:px-8 py-3 sm:py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
                                         >
                                             Curriculum
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="instructor"
-                                            className="rounded-none border-b-2 border-transparent px-8 py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
+                                            className="rounded-none border-b-2 border-transparent px-3 sm:px-6 lg:px-8 py-3 sm:py-4 font-accent text-lg uppercase tracking-wider data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent transition-all hover:text-primary/70"
                                         >
                                             Instructor
                                         </TabsTrigger>
@@ -165,7 +167,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                                             <div className="bg-card p-8 border border-primary/10 hover:border-primary/30 transition-colors">
                                                 <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
                                                     <span className="w-1 h-6 bg-primary inline-block mr-2"></span>
-                                                    What You'll Learn
+                                                    What You&apos;ll Learn
                                                 </h4>
                                                 <ul className="space-y-3">
                                                     {course.information?.learningOutcomes && course.information.learningOutcomes.length > 0 ? (
