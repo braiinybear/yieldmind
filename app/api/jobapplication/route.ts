@@ -6,7 +6,7 @@ import { ApplicationStatus } from "@prisma/client";
 // POST - Create job application (apply for job)
 export async function POST(req: NextRequest) {
   try {
-    const userId: string | null = "0f6373fb-a515-45c5-aa1f-7bb06d17a5c2";
+    const userId: string | null = await getCurrentUserId();
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -229,107 +229,4 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PUT - Update application status (Admin/Employee only)
-export async function PUT(req: NextRequest) {
-  try {
-    const userId: string | null = await getCurrentUserId();
 
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    if (user.role === "STUDENT") {
-      return NextResponse.json(
-        { error: "Students cannot update application status" },
-        { status: 403 },
-      );
-    }
-
-    const body = await req.json();
-    const { applicationId, status } = body;
-
-    if (!applicationId || !status) {
-      return NextResponse.json(
-        { error: "Application ID and status are required" },
-        { status: 400 },
-      );
-    }
-
-    // Validate status
-    const validStatuses = Object.values(ApplicationStatus);
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-    }
-
-    // Get application to check permissions
-    const application = await prisma.jobApplication.findUnique({
-      where: { id: applicationId },
-      include: {
-        JobPosition: {
-          select: {
-            createdById: true,
-          },
-        },
-      },
-    });
-
-    if (!application) {
-      return NextResponse.json(
-        { error: "Application not found" },
-        { status: 404 },
-      );
-    }
-
-    // Check if employee has permission to update this application
-    if (
-      user.role === "EMPLOYEE" &&
-      application.JobPosition.createdById !== userId
-    ) {
-      return NextResponse.json(
-        { error: "You don't have permission to update this application" },
-        { status: 403 },
-      );
-    }
-
-    // Update application status
-    const updatedApplication = await prisma.jobApplication.update({
-      where: { id: applicationId },
-      data: { status },
-      include: {
-        JobPosition: {
-          select: {
-            id: true,
-            title: true,
-            department: true,
-          },
-        },
-        User: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json(
-      { success: true, data: updatedApplication },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error("UPDATE APPLICATION STATUS ERROR:", error);
-    return NextResponse.json(
-      { error: "Failed to update application status" },
-      { status: 500 },
-    );
-  }
-}

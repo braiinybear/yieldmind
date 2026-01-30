@@ -160,7 +160,7 @@ model JobApplication {
   qualification String
   experience    Int?
   skills        String[]
-  resumeUrl     String // uploaded resume (PDF)
+  resumeUrl     String
   coverLetter   String?
 
   status ApplicationStatus @default(APPLIED)

@@ -141,17 +141,24 @@ export const JobApplicationStore = (initState: JobApplicationState = defaultInit
           error: null,
         }));
 
-        const res = await fetch("/api/jobapplication", {
+        const res = await fetch(`/api/jobapplication/${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id, ...payload }),
+          body: JSON.stringify(payload),
         });
 
         if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || "Job application update failed");
+          let errorMessage = "Job application update failed";
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (jsonError) {
+            // If response is not JSON, use the status text
+            errorMessage = `${res.status}: ${res.statusText}`;
+          }
+          throw new Error(errorMessage);
         }
 
         const responseData = await res.json();

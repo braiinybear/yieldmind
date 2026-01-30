@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 // import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import * as XLSX from "xlsx";
 import {
   Plus,
   Search,
@@ -31,52 +32,9 @@ import { useJobPositionStore } from "@/zustand/root-store-provider";
 import { CreateJobPositionPayload } from "@/components/admin/JobPositionForm";
 import { toast } from "sonner";
 import { JobPositionWithRelations } from "@/app/api/jobpositions/route";
+import { useJobApplicationStore } from "@/zustand/root-store-provider";
 
-// Mock data for applicants
-const mockApplicants = [
-  {
-    id: 1,
-    fullName: "John Doe",
-    email: "john.doe@email.com",
-    phone: "+1 234 567 8900",
-    jobTitle: "Senior Frontend Developer",
-    qualification: "Bachelor's in Computer Science",
-    experience: 5,
-    skills: ["React", "TypeScript", "Next.js", "Node.js"],
-    status: "SHORTLISTED",
-    appliedAt: "2025-01-18",
-    resumeUrl: "/resumes/john-doe.pdf",
-    coverLetter: "I am excited to apply for this position...",
-  },
-  {
-    id: 2,
-    fullName: "Jane Smith",
-    email: "jane.smith@email.com",
-    phone: "+1 234 567 8901",
-    jobTitle: "Marketing Manager",
-    qualification: "MBA in Marketing",
-    experience: 3,
-    skills: ["Digital Marketing", "SEO", "Content Strategy", "Analytics"],
-    status: "APPLIED",
-    appliedAt: "2025-01-16",
-    resumeUrl: "/resumes/jane-smith.pdf",
-    coverLetter: "With my marketing background...",
-  },
-  {
-    id: 3,
-    fullName: "Bob Johnson",
-    email: "bob.johnson@email.com",
-    phone: "+1 234 567 8902",
-    jobTitle: "Content Writer",
-    qualification: "Bachelor's in English",
-    experience: 2,
-    skills: ["Content Writing", "SEO", "Social Media", "Copywriting"],
-    status: "REJECTED",
-    appliedAt: "2025-01-22",
-    resumeUrl: "/resumes/bob-johnson.pdf",
-    coverLetter: "I am passionate about creating compelling content...",
-  },
-];
+
 
 export default function HiringPage() {
   const [activeTab, setActiveTab] = useState<string>("positions");
@@ -88,10 +46,13 @@ export default function HiringPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedJob, setSelectedJob] =
     useState<JobPositionWithRelations | null>(null);
+  const [applicantSearchTerm, setApplicantSearchTerm] = useState<string>("");
+  const [selectedJobFilter, setSelectedJobFilter] = useState<string>("");
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("");
 
   const ITEMS_PER_PAGE = 10;
 
-  // Store hooks
+  //Job Positions Store hooks
   const jobPositions = useJobPositionStore((state) => state.JobPositionData);
   const deleteJobPosition = useJobPositionStore(
     (state) => state.deleteJobPosition,
@@ -102,9 +63,24 @@ export default function HiringPage() {
   const loading = useJobPositionStore((state) => state.loading);
   const error = useJobPositionStore((state) => state.error);
 
+  // Job Application Store hooks
+  const jobApplications = useJobApplicationStore((state) => state.JobApplicationData);
+  const fetchJobApplications = useJobApplicationStore(
+    (state) => state.fetchJobApplications,
+  );
+  const updateJobApplication = useJobApplicationStore(
+    (state) => state.updateJobApplication,
+  );
+  const deleteJobApplication = useJobApplicationStore(
+    (state) => state.deleteJobApplication,
+  );
+  const applicationLoading = useJobApplicationStore((state) => state.loading);
+  const applicationError = useJobApplicationStore((state) => state.error);
+
   useEffect(() => {
     fetchJobPositions();
-  }, [fetchJobPositions]);
+    fetchJobApplications();
+  }, [fetchJobPositions, fetchJobApplications]);
 
   const handleNewJob = () => {
     setSelectedJob(null);
@@ -133,6 +109,92 @@ export default function HiringPage() {
     }
   };
 
+  const handleStatusUpdate = async (applicationId: string, newStatus: string) => {
+    try {
+      await updateJobApplication(applicationId, { 
+        status: newStatus as "APPLIED" | "SHORTLISTED" | "REJECTED" | "HIRED",
+      });
+      toast.success("Application status updated successfully!");
+    } catch (error) {
+      console.error("Failed to update application status:", error);
+      toast.error("Failed to update application status");
+    }
+  };
+
+  const handleDeleteApplication = async (applicationId: string) => {
+    if (confirm("Are you sure you want to delete this job application?")) {
+      try {
+        await deleteJobApplication(applicationId);
+        toast.success("Job application deleted successfully!");
+      } catch (error) {
+        console.error("Failed to delete job application:", error);
+        toast.error("Failed to delete job application");
+      }
+    }
+  };
+
+  const handleExportToExcel = () => {
+    try {
+      // Prepare data for Excel export
+      const exportData = filteredJobApplications.map((application, index) => ({
+        'S.No': index + 1,
+        'Applicant Name': application.fullName,
+        'Email': application.email,
+        'Phone': application.phone,
+        'Job Title': application.JobPosition.title,
+        'Department': application.JobPosition.department,
+        'Location': application.JobPosition.location || 'N/A',
+        'Employment Type': application.JobPosition.employmentType,
+        'Qualification': application.qualification,
+        'Experience (Years)': application.experience || 0,
+        'Skills': Array.isArray(application.skills) ? application.skills.join(', ') : application.skills || 'N/A',
+        'Status': application.status,
+        'Applied Date': new Date(application.appliedAt).toLocaleDateString(),
+        'Cover Letter': application.coverLetter || 'N/A',
+        'Resume URL': application.resumeUrl,
+      }));
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // Set column widths for better formatting
+      const columnWidths = [
+        { wch: 8 },  // S.No
+        { wch: 20 }, // Applicant Name
+        { wch: 25 }, // Email
+        { wch: 15 }, // Phone
+        { wch: 25 }, // Job Title
+        { wch: 15 }, // Department
+        { wch: 15 }, // Location
+        { wch: 15 }, // Employment Type
+        { wch: 20 }, // Qualification
+        { wch: 12 }, // Experience
+        { wch: 30 }, // Skills
+        { wch: 12 }, // Status
+        { wch: 12 }, // Applied Date
+        { wch: 30 }, // Cover Letter
+        { wch: 40 }, // Resume URL
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Job Applications");
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const filename = `job-applications-export-${timestamp}.xlsx`;
+
+      // Download the file
+      XLSX.writeFile(workbook, filename);
+      
+      toast.success(`Exported ${exportData.length} applications to Excel successfully!`);
+    } catch (error) {
+      console.error('Failed to export to Excel:', error);
+      toast.error('Failed to export data to Excel');
+    }
+  };
+
   // Filter job positions based on search term, department, and employment type
   const filteredJobPositions = jobPositions.filter((job) => {
     const matchesSearch =
@@ -155,6 +217,27 @@ export default function HiringPage() {
       job.employmentType === selectedEmploymentType;
 
     return matchesSearch && matchesDepartment && matchesEmploymentType;
+  });
+
+  // Filter job applications based on search term, job, and status
+  const filteredJobApplications = jobApplications.filter((application) => {
+    const matchesSearch =
+      application.fullName.toLowerCase().includes(applicantSearchTerm.toLowerCase()) ||
+      application.email.toLowerCase().includes(applicantSearchTerm.toLowerCase()) ||
+      application.JobPosition.title.toLowerCase().includes(applicantSearchTerm.toLowerCase()) ||
+      application.JobPosition.department.toLowerCase().includes(applicantSearchTerm.toLowerCase());
+
+    const matchesJob =
+      !selectedJobFilter ||
+      selectedJobFilter === "all" ||
+      application.JobPosition.id === selectedJobFilter;
+
+    const matchesStatus =
+      !selectedStatusFilter ||
+      selectedStatusFilter === "all" ||
+      application.status === selectedStatusFilter;
+
+    return matchesSearch && matchesJob && matchesStatus;
   });
 
   // Get unique departments for filter dropdown
@@ -290,7 +373,7 @@ export default function HiringPage() {
                   Total Applications
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {mockApplicants.length}
+                  {jobApplications.length}
                 </p>
               </div>
               <Users className="w-8 h-8 text-purple-600" />
@@ -305,7 +388,7 @@ export default function HiringPage() {
                 <p className="text-sm font-medium text-gray-600">Shortlisted</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {
-                    mockApplicants.filter((app) => app.status === "SHORTLISTED")
+                    jobApplications.filter((app) => app.status === "SHORTLISTED")
                       .length
                   }
                 </p>
@@ -342,7 +425,7 @@ export default function HiringPage() {
     "
           >
             <Users className="w-4 h-4" />
-            All Applicants ({mockApplicants.length})
+            All Applicants ({jobApplications.length})
           </TabsTrigger>
         </TabsList>
 
@@ -607,121 +690,189 @@ export default function HiringPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Search applicants..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={applicantSearchTerm}
+                onChange={(e) => setApplicantSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <select className="px-3 py-2 border border-gray-300 rounded-md">
-              <option>All Positions</option>
-              <option>Senior Frontend Developer</option>
-              <option>Marketing Manager</option>
-              <option>Content Writer</option>
+            <select 
+              className="px-3 py-2 border border-gray-300 rounded-md"
+              value={selectedJobFilter}
+              onChange={(e) => setSelectedJobFilter(e.target.value)}
+            >
+              <option value="">All Positions</option>
+              {jobPositions
+                .filter((job, index, self) => 
+                  index === self.findIndex(j => j.id === job.id)
+                )
+                .map((job) => (
+                  <option key={`job-filter-${job.id}`} value={job.id}>
+                    {job.title}
+                  </option>
+                ))}
             </select>
-            <select className="px-3 py-2 border border-gray-300 rounded-md">
-              <option>All Status</option>
-              <option>Applied</option>
-              <option>Shortlisted</option>
-              <option>Rejected</option>
-              <option>Hired</option>
+            <select 
+              className="px-3 py-2 border border-gray-300 rounded-md"
+              value={selectedStatusFilter}
+              onChange={(e) => setSelectedStatusFilter(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="APPLIED">Applied</option>
+              <option value="SHORTLISTED">Shortlisted</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="HIRED">Hired</option>
             </select>
-            <Button className="text-white bg-black  active:scale-95  hover:bg-zinc-900  transition-transform duration-150">
+            <Button 
+              className="text-white bg-black  active:scale-95  hover:bg-zinc-900  transition-transform duration-150"
+              onClick={handleExportToExcel}
+              disabled={filteredJobApplications.length === 0}
+            >
               <Download className="w-4 h-4 mr-2 " />
-              Export
+              Export ({filteredJobApplications.length})
             </Button>
           </div>
 
           {/* Applicants Grid */}
           <div className="grid gap-4">
-            {mockApplicants.map((applicant) => (
-              <Card
-                key={applicant.id}
-                className="hover:shadow-lg transition-shadow bg-white text-black"
-              >
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {applicant.fullName}
-                          </h3>
-                          <p className="text-sm text-gray-600 font-medium">
-                            {applicant.jobTitle}
-                          </p>
-                        </div>
-                        <Badge className={getStatusColor(applicant.status)}>
-                          {applicant.status.toLowerCase().replace("_", " ")}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
-                        <div className="flex items-center gap-1">
-                          <Mail className="w-4 h-4" />
-                          {applicant.email}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Phone className="w-4 h-4" />
-                          {applicant.phone}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <FileText className="w-4 h-4" />
-                          {applicant.qualification}
-                        </div>
-                      </div>
-
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Experience:</span>{" "}
-                          {applicant.experience} years
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {applicant.skills.map((skill, index) => (
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span>Applied on {applicant.appliedAt}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 mt-4 lg:mt-0 lg:ml-4">
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-black text-white   hover:bg-zinc-900  transition-transform duration-150 active:scale-95"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Resume
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-black hover:bg-zinc-900 text-white  transition-transform duration-150 active:scale-95"
-                        >
-                          <Mail className="w-4 h-4 mr-1" />
-                          Contact
-                        </Button>
-                      </div>
-                      <select className="px-3 py-1 text-sm border border-gray-300 rounded-md">
-                        <option>Update Status</option>
-                        <option>Applied</option>
-                        <option>Shortlisted</option>
-                        <option>Rejected</option>
-                        <option>Hired</option>
-                      </select>
-                    </div>
+            {applicationLoading.fetch ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center">
+                  <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600 mx-auto" />
+                  <p className="mt-4 text-slate-600">Loading Applications...</p>
+                </div>
+              </div>
+            ) : applicationError ? (
+              <div className="text-center py-8 text-red-600">
+                <p>Error: {applicationError}</p>
+              </div>
+            ) : filteredJobApplications.length === 0 ? (
+              <div className="text-center py-8">
+                {applicantSearchTerm || selectedJobFilter || selectedStatusFilter ? (
+                  <div>
+                    <p className="text-gray-600 mb-2">
+                      No applications match your search criteria.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setApplicantSearchTerm("");
+                        setSelectedJobFilter("");
+                        setSelectedStatusFilter("");
+                      }}
+                      className="text-blue-600 hover:text-blue-700 text-sm underline"
+                    >
+                      Clear all filters
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                ) : (
+                  <p>No applications found.</p>
+                )}
+              </div>
+            ) : (
+              filteredJobApplications.map((application) => (
+                <Card
+                  key={application.id}
+                  className="hover:shadow-lg transition-shadow bg-white text-black"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {application.fullName}
+                            </h3>
+                            <p className="text-sm text-gray-600 font-medium">
+                              {application.JobPosition.title}
+                            </p>
+                          </div>
+                          <Badge className={getStatusColor(application.status)}>
+                            {application.status.toLowerCase().replace("_", " ")}
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
+                          <div className="flex items-center gap-1">
+                            <Mail className="w-4 h-4" />
+                            {application.email}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Phone className="w-4 h-4" />
+                            {application.phone}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <FileText className="w-4 h-4" />
+                            {application.qualification}
+                          </div>
+                        </div>
+
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600 mb-1">
+                            <span className="font-medium">Experience:</span>{" "}
+                            {application.experience || 0} years
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {application.skills.map((skill, index) => (
+                              <Badge
+                                key={index}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span>Applied on {new Date(application.appliedAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 mt-4 lg:mt-0 lg:ml-4">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-black text-white   hover:bg-zinc-900  transition-transform duration-150 active:scale-95"
+                            onClick={() => window.open(application.resumeUrl, '_blank')}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Resume
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-black hover:bg-zinc-900 text-white  transition-transform duration-150 active:scale-95"
+                            onClick={() => window.open(`mailto:${application.email}`, '_self')}
+                          >
+                            <Mail className="w-4 h-4 mr-1" />
+                            Contact
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-red-600 hover:bg-red-700 text-white transition-transform duration-150 active:scale-95"
+                            onClick={() => handleDeleteApplication(application.id)}
+                            disabled={applicationLoading.delete}
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                        <select 
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-md"
+                          value={application.status}
+                          onChange={(e) => handleStatusUpdate(application.id, e.target.value)}
+                          disabled={applicationLoading.update}
+                        >
+                          <option value="APPLIED">Applied</option>
+                          <option value="SHORTLISTED">Shortlisted</option>
+                          <option value="REJECTED">Rejected</option>
+                          <option value="HIRED">Hired</option>
+                        </select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
       </Tabs>
