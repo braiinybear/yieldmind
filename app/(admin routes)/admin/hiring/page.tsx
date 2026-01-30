@@ -15,7 +15,7 @@ import {
   Calendar,
   MapPin,
   Clock,
-  DollarSign,
+
   Eye,
   Edit,
   Trash2,
@@ -23,6 +23,8 @@ import {
   Mail,
   Phone,
   FileText,
+  
+  IndianRupeeIcon,
 } from "lucide-react";
 import JobPositionForm from "@/components/admin/JobPositionForm";
 import { useJobPositionStore } from "@/zustand/root-store-provider";
@@ -463,7 +465,7 @@ export default function HiringPage() {
                             {getEmploymentTypeLabel(job.employmentType)}
                           </div>
                           <div className="flex items-center gap-1">
-                            <DollarSign className="w-4 h-4" />
+                            <IndianRupeeIcon className="w-4 h-4" />
                             {job.salaryRange || "N/A"}
                           </div>
                         </div>
