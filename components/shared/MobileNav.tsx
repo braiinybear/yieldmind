@@ -20,6 +20,7 @@ export default function MobileNav({ user }: MobileNavProps) {
         { name: "Courses", href: "/courses" },
         { name: "Admissions", href: "/admissions" },
         { name: "Why Us", href: "/about" },
+        { name: "Careers", href: "/careers" },
     ];
 
     useEffect(() => {
@@ -40,6 +41,8 @@ export default function MobileNav({ user }: MobileNavProps) {
                 const role = data?.user?.role ?? null;
                 if (mounted) setIsAdmin(role === 'ADMIN');
             } catch (err) {
+                console.log(err);
+                
                 if (mounted) setIsAdmin(false);
             }
         };
