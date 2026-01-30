@@ -155,6 +155,8 @@ export const JobApplicationStore = (initState: JobApplicationState = defaultInit
             const errorData = await res.json();
             errorMessage = errorData.error || errorMessage;
           } catch (jsonError) {
+            console.log(jsonError);
+            
             // If response is not JSON, use the status text
             errorMessage = `${res.status}: ${res.statusText}`;
           }

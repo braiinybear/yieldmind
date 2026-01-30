@@ -3,6 +3,103 @@ import { getCurrentUserId } from "@/utility/currentSession";
 import { ApplicationStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
+// GET - Fetch single job application by ID
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const userId: string | null = await getCurrentUserId();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const { id: applicationId } = await params;
+
+    if (!applicationId) {
+      return NextResponse.json(
+        { error: "Application ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Build where clause based on user role
+    const whereClause: {
+      id: string;
+      userId?: string;
+      JobPosition?: {
+        createdById: string;
+      };
+    } = { id: applicationId };
+
+    // Role-based access control
+    if (user.role === "STUDENT") {
+      // Students can only see their own applications
+      whereClause.userId = userId;
+    } else if (user.role === "EMPLOYEE") {
+      // Employees can see applications for jobs they created
+      whereClause.JobPosition = {
+        createdById: userId,
+      };
+    }
+    // Admins can see all applications (no additional filtering)
+
+    const jobApplication = await prisma.jobApplication.findFirst({
+      where: whereClause,
+      include: {
+        JobPosition: {
+          select: {
+            id: true,
+            title: true,
+            department: true,
+            location: true,
+            employmentType: true,
+            salaryRange: true,
+            description: true,
+            experienceRequired: true,
+            createdById: true,
+          },
+        },
+        User: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!jobApplication) {
+      return NextResponse.json(
+        { error: "Job application not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, data: jobApplication },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("GET JOB APPLICATION ERROR:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch job application" },
+      { status: 500 }
+    );
+  }
+}
+
 // PUT - Update application status (Admin/Employee only)
 export async function PUT(
   req: NextRequest, 
@@ -91,6 +188,14 @@ export async function PUT(
       );
     }
 
+    // If status is HIRED, update user role from STUDENT to EMPLOYEE
+    if (status === ApplicationStatus.HIRED) {
+      await prisma.user.update({
+        where: { id: application.userId },
+        data: { role: "EMPLOYEE" },
+      });
+    }
+
     // Fetch the updated application with includes
     const fetchedApplication = await prisma.jobApplication.findFirst({
       where: { id: applicationId },
@@ -107,6 +212,7 @@ export async function PUT(
             id: true,
             name: true,
             email: true,
+            role: true,
           },
         },
       },
@@ -207,4 +313,4 @@ export async function DELETE(
       { status: 500 },
     );
   }
-}
+}    

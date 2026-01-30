@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   BookOpen,
@@ -159,8 +160,8 @@ export default function AdminLayout({
 
         {/* Footer Section */}
         <div className="px-3 py-4 border-t border-slate-700 space-y-3">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-600/20 hover:text-red-400 rounded-lg transition-all duration-200">
-            <LogOut size={20} className="shrink-0" />
+          <button onClick={()=>signOut()} className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-600/20 hover:text-red-400 rounded-lg transition-all duration-200">
+            <LogOut  size={20} className="shrink-0" />
             <span className="text-sm font-medium">Logout</span>
           </button>
           <p className="text-xs text-gray-500 px-2 text-center">
