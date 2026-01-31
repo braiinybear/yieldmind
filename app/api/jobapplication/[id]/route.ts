@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 // GET - Fetch single job application by ID
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const userId: string | null = await getCurrentUserId();
@@ -28,7 +28,7 @@ export async function GET(
     if (!applicationId) {
       return NextResponse.json(
         { error: "Application ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -83,27 +83,27 @@ export async function GET(
     if (!jobApplication) {
       return NextResponse.json(
         { error: "Job application not found or access denied" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json(
       { success: true, data: jobApplication },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("GET JOB APPLICATION ERROR:", error);
     return NextResponse.json(
       { error: "Failed to fetch job application" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // PUT - Update application status (Admin/Employee only)
 export async function PUT(
-  req: NextRequest, 
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const userId: string | null = await getCurrentUserId();
@@ -194,6 +194,11 @@ export async function PUT(
         where: { id: application.userId },
         data: { role: "EMPLOYEE" },
       });
+    } else {
+      await prisma.user.update({
+        where: { id: application.userId },
+        data: { role: "STUDENT" },
+      });
     }
 
     // Fetch the updated application with includes
@@ -233,8 +238,8 @@ export async function PUT(
 
 // DELETE - Delete job application (Admin/Employee only)
 export async function DELETE(
-  req: NextRequest, 
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const userId: string | null = await getCurrentUserId();
@@ -313,4 +318,4 @@ export async function DELETE(
       { status: 500 },
     );
   }
-}    
+}
