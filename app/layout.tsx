@@ -66,7 +66,7 @@ export default function RootLayout({
           </RootStoreProvider>
 
           {/* Toast notifications */}
-          <Toaster position="top-right" richColors closeButton />
+          <Toaster position="top-right" richColors />
         </SessionProvider>
       </body>
     </html>
