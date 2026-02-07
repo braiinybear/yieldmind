@@ -42,9 +42,9 @@ export const metadata: Metadata = {
   title: "YieldMind - Creative Technology Institute",
   description:
     "Master Graphic Design, Web Development, and VFX at Dehradun's premier institute.",
-  icons: {
-    icon: "/logo.png",
-  },
+  // icons: {
+  //   icon: "/logo.png",
+  // },
 };
 
 export default function RootLayout({
@@ -54,6 +54,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+          <link rel="icon" sizes="64x64"  href="\logo.png" />
+        </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} ${montserrat.variable} antialiased min-h-screen flex flex-col`}
       >
