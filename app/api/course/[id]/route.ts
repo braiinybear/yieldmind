@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/db";
+import { createSlug } from "@/lib/formatters";
 import type { CourseType } from "@prisma/client";
 
 interface Lesson {
@@ -112,7 +113,7 @@ export async function PUT(
 
     // Only update slug if it's different from existing
     if (course.slug !== existingCourse.slug) {
-      updateData.slug = course.slug;
+      updateData.slug = createSlug(course.slug);
     }
 
     // Update the course

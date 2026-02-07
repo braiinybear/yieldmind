@@ -5,6 +5,7 @@ import { X, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Course } from "@prisma/client";
 import { useCourseStore } from "@/zustand/root-store-provider";
 import { toast } from "sonner";
+import { createSlug } from "@/lib/formatters";
 
 export interface CourseFormData {
   title: string;
@@ -161,7 +162,7 @@ export default function CourseForm({
       ...prev,
       [name]: value,
       ...(name === "title" && {
-        slug: value.toLowerCase().replace(/\s+/g, "-"),
+        slug: createSlug(value),
       }),
     }));
   };
@@ -278,7 +279,7 @@ export default function CourseForm({
       const payload: CreateCoursePayload = {
         course: {
           title: formData.title,
-          slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
+          slug: formData.slug || createSlug(formData.title),
           shortDescription: formData.shortDescription && formData.shortDescription.trim() ? formData.shortDescription : null,
           description: formData.description,
           instructorName: formData.instructorName && formData.instructorName.trim() ? formData.instructorName : null,

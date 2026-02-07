@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { createSlug } from "@/lib/formatters";
 
 interface Lesson {
   title: string;
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
     const createdCourse = await prisma.course.create({
       data: {
         title: course.title,
-        slug: course.slug,
+        slug: createSlug(course.slug),
         shortDescription:course.shortDescription,
         description: course.description,
         thumbnail: course.thumbnail || null,
