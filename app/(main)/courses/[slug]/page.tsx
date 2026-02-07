@@ -226,7 +226,13 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
                                 <TabsContent value="curriculum" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <AnimatedSection>
-                                        <ModuleSyllabus modules={course.modules} />
+                                        <ModuleSyllabus modules={course.modules.map(module => ({
+                                            ...module,
+                                            lessons: module.lessons.map(lesson => ({
+                                                ...lesson,
+                                                description: lesson.description || ''
+                                            }))
+                                        }))} />
                                     </AnimatedSection>
                                 </TabsContent>
 
