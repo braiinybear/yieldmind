@@ -35,7 +35,7 @@ async function main() {
       email: 'rajesh@yieldmind.com',
       password: hashedPassword,
       phone: '+91-9876543211',
-      role: 'TEACHER',
+      role: 'EMPLOYEE',
     },
   });
 

@@ -4,8 +4,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { User } from "next-auth";
 
@@ -15,12 +14,42 @@ interface MobileNavProps {
 
 export default function MobileNav({ user }: MobileNavProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const navLinks = [
         { name: "Courses", href: "/courses" },
         { name: "Admissions", href: "/admissions" },
         { name: "Why Us", href: "/about" },
+        { name: "Careers", href: "/careers" },
     ];
+
+    useEffect(() => {
+        let mounted = true;
+        const loadRole = async () => {
+            if (!user?.email && !user?.id) {
+                if (mounted) setIsAdmin(false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/user/session');
+                if (!res.ok) {
+                    if (mounted) setIsAdmin(false);
+                    return;
+                }
+                const data = await res.json();
+                const role = data?.user?.role ?? null;
+                if (mounted) setIsAdmin(role === 'ADMIN');
+            } catch (err) {
+                console.log(err);
+                
+                if (mounted) setIsAdmin(false);
+            }
+        };
+
+        loadRole();
+        return () => { mounted = false; };
+    }, [user?.id, user?.email]);
 
     return (
         <div className="md:hidden">
@@ -60,6 +89,13 @@ export default function MobileNav({ user }: MobileNavProps) {
                                         <span className="text-sm font-medium text-muted-foreground">Signed in as</span>
                                         <span className="text-sm font-bold">{user.name}</span>
                                     </div>
+                                    {isAdmin && (
+                                        <Link href="/admin/hiring" onClick={() => setIsOpen(false)}>
+                                            <Button className="w-full mb-2 bg-accent text-accent-foreground font-bold hover:bg-accent/90" size="lg">
+                                                Admin Panel
+                                            </Button>
+                                        </Link>
+                                    )}
                                     <Button
                                         variant="destructive"
                                         className="w-full"

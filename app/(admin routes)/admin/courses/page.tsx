@@ -39,8 +39,6 @@ export default function AdminCoursePage() {
 
   const fetchCourses = useCourseStore((state) => state.fetchCourses);
   const fetchloading = useCourseStore((state) => state.loading.fetch);
-  const createloading = useCourseStore((state) => state.loading.create);
-  const updateLoading = useCourseStore((state) => state.loading.update);
   const deleteLoading = useCourseStore((state) => state.loading.delete);
   const deleteCourse = useCourseStore((state) => state.deleteCourse);
 
@@ -108,7 +106,7 @@ export default function AdminCoursePage() {
             setSelectedCourse(undefined);
             setIsFormOpen(true);
           }}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="flex items-center gap-2 rounded-lg bg-black px-4 py-2  text-white hover:bg-zinc-900"
         >
           <Plus size={18} />
           Create Course
@@ -116,7 +114,7 @@ export default function AdminCoursePage() {
       </div>
 
       {/* Courses Table */}
-      <div className="overflow-x-auto rounded-lg bg-white shadow text-black">
+      <div className="overflow-x-auto rounded-lg [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-white shadow text-black ">
         <table className="min-w-275 w-full text-sm">
           <thead className="border-b bg-slate-50">
             <tr>

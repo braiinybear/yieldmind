@@ -13,6 +13,7 @@ export default async function Navbar() {
     { name: "Courses", href: "/courses" },
     { name: "Admissions", href: "/admissions" },
     { name: "Why Us", href: "/about" },
+    { name: "Careers", href: "/careers" },
   ];
 
   return (
@@ -21,7 +22,6 @@ export default async function Navbar() {
       <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent z-10" />
 
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
-
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-3 group">
@@ -76,7 +76,6 @@ export default async function Navbar() {
 
         {/* Mobile Menu */}
         <MobileNav user={user} />
-
       </div>
     </nav>
   );

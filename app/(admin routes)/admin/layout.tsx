@@ -6,23 +6,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   BookOpen,
   Users,
-  CreditCard,
-  Settings,
   LogOut,
   Menu,
   X,
+  Briefcase,
+  RefreshCcw,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
   { href: "/admin/enrollments", label: "Enrollments", icon: Users },
-  { href: "/admin/payments", label: "Payments", icon: CreditCard },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/hiring", label: "Hiring", icon: Briefcase },
+  { href: "/admin/course-updates", label: "Course-Update", icon: RefreshCcw },
 ];
 
 export default function AdminLayout({
@@ -63,17 +64,20 @@ export default function AdminLayout({
           title: "Enrollments",
           description: "Manage student enrollments",
         };
-      case pathname.startsWith("/admin/payments"):
-        return { title: "Payments", description: "Track payment transactions" };
-      case pathname.startsWith("/admin/settings"):
+      case pathname.startsWith("/admin/hiring"):
         return {
-          title: "Settings",
-          description: "Configure platform settings",
+          title: "Hiring",
+          description: "Manage job postings and applicants",
         };
       default:
         return {
           title: "Admin Dashboard",
           description: "Manage your platform efficiently",
+        };
+      case pathname.startsWith("/admin/course-updates"):
+        return {
+          title: "Course Updates",
+          description: "Check and update drafted courses before publishing",
         };
     }
   };
@@ -92,12 +96,13 @@ export default function AdminLayout({
 
       {/* Sidebar - Fixed */}
       <aside
-        className={`${isMobile
+        className={`${
+          isMobile
             ? sidebarOpen
               ? "translate-x-0"
               : "-translate-x-full"
             : "translate-x-0"
-          } fixed md:static md:translate-x-0 h-screen z-50 w-64 bg-linear-to-b from-slate-900 to-slate-800 text-gray-100 flex flex-col transition-transform duration-300 ease-in-out md:transition-none shadow-2xl md:shadow-lg`}
+        } fixed md:static md:translate-x-0 h-screen z-50 w-64 bg-linear-to-b from-slate-900 to-slate-800 text-gray-100 flex flex-col transition-transform duration-300 ease-in-out md:transition-none shadow-2xl md:shadow-lg`}
       >
         {/* Logo Section */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
@@ -109,7 +114,8 @@ export default function AdminLayout({
                 width={150}
                 alt="YieldMind"
                 className="rounded-lg block"
-              /></Link>
+              />
+            </Link>
           </div>
 
           <button
@@ -138,9 +144,10 @@ export default function AdminLayout({
                 className={`
                   flex items-center gap-3 px-3 md:px-4 py-3 rounded-lg
                   transition-all duration-200 ease-in-out min-h-11 md:min-h-auto
-                  ${isActive
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                    : "text-gray-300 hover:bg-slate-700 hover:text-white"
+                  ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
+                      : "text-gray-300 hover:bg-slate-700 hover:text-white"
                   }
                 `}
               >
@@ -153,8 +160,8 @@ export default function AdminLayout({
 
         {/* Footer Section */}
         <div className="px-3 py-4 border-t border-slate-700 space-y-3">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-600/20 hover:text-red-400 rounded-lg transition-all duration-200">
-            <LogOut size={20} className="shrink-0" />
+          <button onClick={()=>signOut()} className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-600/20 hover:text-red-400 rounded-lg transition-all duration-200">
+            <LogOut  size={20} className="shrink-0" />
             <span className="text-sm font-medium">Logout</span>
           </button>
           <p className="text-xs text-gray-500 px-2 text-center">

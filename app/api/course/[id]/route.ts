@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/db";
 import { createSlug } from "@/lib/formatters";
-import type { CourseType } from "@prisma/client";
+import { getCurrentUserId } from "@/utility/currentSession";
+import type { CourseStatus, CourseType } from "@prisma/client";
 
 interface Lesson {
   title: string;
@@ -22,7 +23,7 @@ interface CourseUpdateData {
   price: number;
   type: CourseType;
   venue: string | null;
-  shortDescription:string,
+  shortDescription: string;
   startDate: Date | null;
   batchSize: number;
   duration: string | null;
@@ -31,6 +32,11 @@ interface CourseUpdateData {
   instructorBio: string;
 }
 
+// What this API does:
+// It returns one course with modules, lessons, and information, but:
+// Students → only published courses
+// Employees → only their own courses
+// Admin → any course
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -38,8 +44,38 @@ export async function GET(
   try {
     const { id } = await params;
 
+    const userId: string | null = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId || undefined },
+    });
+
+    let whereClause: {
+      id: string;
+      status?: CourseStatus;
+      creatorId?: string;
+    } = { id };
+
+    // Role-based access control
+    if (user?.role === "STUDENT") {
+      // Students can only see published courses
+      whereClause = {
+        id,
+        status: "PUBLISHED",
+      };
+    } else if (user?.role === "EMPLOYEE") {
+      // Employees can see courses they created
+      whereClause = {
+        id,
+        creatorId: userId || undefined,
+      };
+    }
+    // Admin can see all courses (no additional filtering)
+
     const course = await prisma.course.findUnique({
-      where: { id },
+      where: whereClause,
       include: {
         modules: {
           include: {
@@ -53,6 +89,7 @@ export async function GET(
             order: "asc",
           },
         },
+        information: true,
       },
     });
 
@@ -70,6 +107,13 @@ export async function GET(
   }
 }
 
+// What this API does:
+// It updates:
+// Course data
+// Modules
+// Lessons
+// Information
+// And sets status depending on role.
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -83,7 +127,21 @@ export async function PUT(
         { status: 400 },
       );
     }
+    const userId: string | null = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId || undefined },
+    });
+
+    if (user?.role === "STUDENT") {
+      return NextResponse.json(
+        { error: "You can't update course" },
+        { status: 500 },
+      );
+    }
     const { course, modules, information } = await req.json();
 
     // Fetch existing course to check if slug has changed
@@ -102,7 +160,7 @@ export async function PUT(
       thumbnail: course.thumbnail || null,
       price: course.price,
       type: course.type,
-        shortDescription:course.shortDescription,
+      shortDescription: course.shortDescription,
       instructorName: course.instructorName,
       instructorBio: course.instructorBio,
       venue: course.venue || null,
@@ -183,6 +241,20 @@ export async function PUT(
       }
     }
 
+    if (user?.role === "EMPLOYEE") {
+      await prisma.course.update({
+        where: { id: updatedCourse.id },
+        data: { status: "PENDING" },
+      });
+    }
+
+    if (user?.role === "ADMIN") {
+      await prisma.course.update({
+        where: { id: updatedCourse.id },
+        data: { status: "PUBLISHED" },
+      });
+    }
+
     return NextResponse.json(
       { success: true, courseId: updatedCourse.id },
       { status: 200 },
@@ -196,6 +268,12 @@ export async function PUT(
   }
 }
 
+
+
+
+// What this API does:
+// Deletes a course permanently
+// Only ADMIN is allowed.
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -207,6 +285,22 @@ export async function DELETE(
       return NextResponse.json(
         { error: "Course ID is required" },
         { status: 400 },
+      );
+    }
+
+    const userId: string | null = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId || undefined },
+    });
+
+    if (user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "You can't delete course" },
+        { status: 500 },
       );
     }
 

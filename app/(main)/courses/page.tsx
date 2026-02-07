@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { CourseCard } from "@/components/shared/CourseCard";
 import { AnimatedSection } from "@/components/animations/AnimatedSection";
-import { BookOpen, Filter } from "lucide-react";
+import { BookOpen,} from "lucide-react";
 
 /**
  * Course Catalog Page - Premium Design
@@ -92,7 +92,7 @@ export default async function CoursesPage() {
                                     No Courses Available
                                 </h3>
                                 <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                                    We're curating exceptional learning experiences.
+                                    We&apos;re curating exceptional learning experiences.
                                     Check back soon for new courses!
                                 </p>
                             </div>
