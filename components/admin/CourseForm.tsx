@@ -6,7 +6,10 @@ import { Course } from "@prisma/client";
 import { useCourseStore } from "@/zustand/root-store-provider";
 import { toast } from "sonner";
 import { createSlug } from "@/lib/formatters";
-
+import Image from "next/image";
+import { uploadImageToCloudinary } from "@/utility/cloudinary";
+import { deleteImageFromCloudinary } from "@/utility/cloudinary";
+import { Button } from "../ui/button";
 export interface CourseFormData {
   title: string;
   slug: string;
@@ -34,11 +37,11 @@ interface CourseInformation {
   learningOutcomes: string[];
   requirements: string[];
   createdAt: string;
-  updatedAt: string; 
+  updatedAt: string;
 }
 interface CourseWithModulesAndInformation extends Course {
   modules?: CourseModule[];
-   information?: CourseInformation;
+  information?: CourseInformation;
 }
 
 interface CourseFormProps {
@@ -107,10 +110,13 @@ export interface CreateCoursePayload {
   information: CourseInformationPayload;
 }
 
-export default function CourseForm({
-  course,
-  onClose,
-}: CourseFormProps) {
+// Helper to delete image from Cloudinary via backend
+
+export default function CourseForm({ course, onClose }: CourseFormProps) {
+  const [imageUploading, setImageUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [imageDeleting, setImageDeleting] = useState(false);
+  const [videoDeleting, setVideoDeleting] = useState(false);
   const createCourse = useCourseStore((state) => state.createCourse);
   const updateCourse = useCourseStore((state) => state.updateCourse);
   const fetchCourse = useCourseStore((state) => state.fetchCourses);
@@ -136,13 +142,15 @@ export default function CourseForm({
     batchSize: course?.batchSize?.toString() || "",
     duration: course?.duration || "",
     includes: course?.information?.includes || [],
-    learningOutcomes:course?.information?.learningOutcomes || [],
-    requirements:course?.information?.requirements || [],
+    learningOutcomes: course?.information?.learningOutcomes || [],
+    requirements: course?.information?.requirements || [],
   }));
 
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
-  const [loadingModules, setLoadingModules] = useState(() => !!(course?.id && course?.modules));
+  const [loadingModules, setLoadingModules] = useState(
+    () => !!(course?.id && course?.modules),
+  );
 
   // Initialize modules when editing a course
   useEffect(() => {
@@ -187,7 +195,11 @@ export default function CourseForm({
     setExpandedModule(newModule.id);
   };
 
-  const updateModule = (moduleId: string, field: string, value: string | number) => {
+  const updateModule = (
+    moduleId: string,
+    field: string,
+    value: string | number,
+  ) => {
     setModules(
       modules.map((mod) =>
         mod.id === moduleId ? { ...mod, [field]: value } : mod,
@@ -254,24 +266,33 @@ export default function CourseForm({
   };
 
   // Helper functions for array fields
-  const addArrayItem = (field: 'includes' | 'learningOutcomes' | 'requirements') => {
-    setFormData(prev => ({
+  const addArrayItem = (
+    field: "includes" | "learningOutcomes" | "requirements",
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: [...prev[field], '']
+      [field]: [...prev[field], ""],
     }));
   };
 
-  const updateArrayItem = (field: 'includes' | 'learningOutcomes' | 'requirements', index: number, value: string) => {
-    setFormData(prev => ({
+  const updateArrayItem = (
+    field: "includes" | "learningOutcomes" | "requirements",
+    index: number,
+    value: string,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].map((item, i) => i === index ? value : item)
+      [field]: prev[field].map((item, i) => (i === index ? value : item)),
     }));
   };
 
-  const deleteArrayItem = (field: 'includes' | 'learningOutcomes' | 'requirements', index: number) => {
-    setFormData(prev => ({
+  const deleteArrayItem = (
+    field: "includes" | "learningOutcomes" | "requirements",
+    index: number,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
+      [field]: prev[field].filter((_, i) => i !== index),
     }));
   };
 
@@ -289,24 +310,45 @@ export default function CourseForm({
         course: {
           title: formData.title,
           slug: formData.slug || createSlug(formData.title),
-          shortDescription: formData.shortDescription && formData.shortDescription.trim() ? formData.shortDescription : null,
+          shortDescription:
+            formData.shortDescription && formData.shortDescription.trim()
+              ? formData.shortDescription
+              : null,
           description: formData.description,
-          instructorName: formData.instructorName && formData.instructorName.trim() ? formData.instructorName : null,
-          instructorBio: formData.instructorBio && formData.instructorBio.trim() ? formData.instructorBio : null,
-          thumbnail: formData.thumbnail && formData.thumbnail.trim() ? formData.thumbnail : null,
-          demoVideo: formData.demoVideo && formData.demoVideo.trim() ? formData.demoVideo : null,
+          instructorName:
+            formData.instructorName && formData.instructorName.trim()
+              ? formData.instructorName
+              : null,
+          instructorBio:
+            formData.instructorBio && formData.instructorBio.trim()
+              ? formData.instructorBio
+              : null,
+          thumbnail:
+            formData.thumbnail && formData.thumbnail.trim()
+              ? formData.thumbnail
+              : null,
+          demoVideo:
+            formData.demoVideo && formData.demoVideo.trim()
+              ? formData.demoVideo
+              : null,
           price: parseFloat(formData.price) || 0,
           difficulty: formData.difficulty,
           type: formData.type,
-          venue: formData.venue && formData.venue.trim() ? formData.venue : null,
+          venue:
+            formData.venue && formData.venue.trim() ? formData.venue : null,
           startDate: formData.startDate || null,
-          batchSize: formData.batchSize ? parseInt(formData.batchSize, 10) : null,
-          duration: formData.duration && formData.duration.trim() ? formData.duration : null,
+          batchSize: formData.batchSize
+            ? parseInt(formData.batchSize, 10)
+            : null,
+          duration:
+            formData.duration && formData.duration.trim()
+              ? formData.duration
+              : null,
         },
-        modules: modules.map(mod => ({
+        modules: modules.map((mod) => ({
           title: mod.title,
           order: mod.order,
-          lessons: mod.lessons.map(lesson => ({
+          lessons: mod.lessons.map((lesson) => ({
             title: lesson.title,
             description: lesson.description || null,
             videoUrl: lesson.videoUrl || null,
@@ -326,11 +368,11 @@ export default function CourseForm({
       // Check if editing or creating
       if (course?.id) {
         await updateCourse(course.id, payload);
-        await fetchCourse()
+        await fetchCourse();
         toast.success("Course updated successfully!");
       } else {
         await createCourse(payload);
-        await fetchCourse()
+        await fetchCourse();
         toast.success("Course created successfully!");
       }
 
@@ -340,7 +382,6 @@ export default function CourseForm({
       console.error("Submit error:", error);
     }
   };
-
 
   return (
     <>
@@ -398,7 +439,7 @@ export default function CourseForm({
                 <input
                   type="text"
                   name="slug"
-                  value={formData.slug}
+                  value={formData.slug ?? ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Auto-generated from title"
@@ -439,31 +480,144 @@ export default function CourseForm({
               {/* Thumbnail */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Thumbnail URL
+                  Thumbnail Image
                 </label>
                 <input
-                  type="url"
-                  name="thumbnail"
-                  value={formData.thumbnail}
-                  onChange={handleChange}
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const result = await uploadImageToCloudinary(
+                      file,
+                      setImageUploading,
+                      "image",
+                    );
+                    if (result && result.url) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        thumbnail: result.url ?? "",
+                      }));
+                      toast.success("Image uploaded to Cloudinary!");
+                    } else if (result && result.error) {
+                      toast.error(result.error);
+                    }
+                  }}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/image.jpg"
                 />
+                {imageUploading && (
+                  <div className="text-blue-600 text-sm mt-2">
+                    Uploading image...
+                  </div>
+                )}
+                {formData.thumbnail && !imageUploading && (
+                  <div className="mt-2 inline-block">
+                    <Image
+                      width={150}
+                      height={150}
+                      src={formData.thumbnail}
+                      alt="Thumbnail Preview"
+                      className="h-24 rounded"
+                    />
+                    <Button
+                      type="button"
+                      className="bg-white border mt-2 border-slate-300 rounded-md px-2 py-1 shadow hover:bg-red-100 z-10 flex items-center gap-2 disabled:opacity-60"
+                      title="Remove image"
+                      disabled={imageDeleting}
+                      onClick={async () => {
+                        setImageDeleting(true);
+                        const ok = await deleteImageFromCloudinary(
+                          formData.thumbnail,
+                          course?.id,
+                          'image'
+                        );
+                        setImageDeleting(false);
+                        if (ok) {
+                          setFormData((prev) => ({ ...prev, thumbnail: "" }));
+                          toast.success("Thumbnail removed");
+                        }
+                      }}
+                    >
+                      {imageDeleting && (
+                        <span className="w-4 h-4 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></span>
+                      )}
+                      <span className="text-red-600 font-md text-xs">
+                        Delete Thumbnail
+                      </span>
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Demo Video */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Demo Video URL
+                  Demo Video
                 </label>
                 <input
-                  type="url"
-                  name="demoVideo"
-                  value={formData.demoVideo}
-                  onChange={handleChange}
+                  type="file"
+                  accept="video/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const result = await uploadImageToCloudinary(
+                      file,
+                      setVideoUploading,
+                      "video",
+                    );
+                    if (result && result.url) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        demoVideo: result.url ?? "",
+                      }));
+                      toast.success("Video uploaded to Cloudinary!");
+                    } else if (result && result.error) {
+                      toast.error(result.error);
+                    }
+                  }}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/demo.mp4"
                 />
+                {videoUploading && (
+                  <div className="text-blue-600 text-sm mt-2">
+                    Uploading video...
+                  </div>
+                )}
+                {formData.demoVideo && !videoUploading && (
+                  <div className="relative mt-2 mb-6 inline-block overflow-visible z-20">
+                    <video
+                      src={formData.demoVideo}
+                      autoPlay
+                      className="h-24 rounded bg-black"
+                      style={{ maxWidth: 180 }}
+                    />
+                    <Button
+                      type="button"
+                      className="bg-white border mt-2 border-slate-300 rounded-md px-2 py-1 shadow hover:bg-red-100 z-10 flex items-center gap-2 disabled:opacity-60"
+                      title="Remove video"
+                      disabled={videoDeleting}
+                      onClick={async () => {
+                        setVideoDeleting(true);
+                        const ok = await deleteImageFromCloudinary(
+                          formData.demoVideo,
+                          course?.id,
+                          'video'
+                        );
+                        setVideoDeleting(false);
+                        if (ok) {
+                          setFormData((prev) => ({ ...prev, demoVideo: "" }));
+                          toast.success("Demo video removed");
+                        }
+                      }}
+                    >
+                      {videoDeleting && (
+                        <span className="w-4 h-4 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></span>
+                      )}
+                      <span className="text-red-600 font-md text-xs">
+                        Delete Video
+                      </span>
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Instructor Name */}
@@ -474,7 +628,7 @@ export default function CourseForm({
                 <input
                   type="text"
                   name="instructorName"
-                  value={formData.instructorName}
+                  value={formData.instructorName ?? ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter instructor name"
@@ -567,7 +721,7 @@ export default function CourseForm({
                   <input
                     type="text"
                     name="venue"
-                    value={formData.venue}
+                    value={formData.venue ?? ""}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter venue location"
@@ -596,7 +750,7 @@ export default function CourseForm({
                   <input
                     type="text"
                     name="duration"
-                    value={formData.duration}
+                    value={formData.duration ?? ""}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., 4 weeks"
@@ -635,7 +789,7 @@ export default function CourseForm({
                   </label>
                   <button
                     type="button"
-                    onClick={() => addArrayItem('includes')}
+                    onClick={() => addArrayItem("includes")}
                     className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
                   >
                     <Plus size={14} />
@@ -645,7 +799,8 @@ export default function CourseForm({
                 <div className="space-y-2">
                   {formData.includes.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center py-2">
-                      No items added. Click &quot;Add Item&quot; to add what&apos;s included in this course.
+                      No items added. Click &quot;Add Item&quot; to add
+                      what&apos;s included in this course.
                     </p>
                   ) : (
                     formData.includes.map((item, index) => (
@@ -653,13 +808,15 @@ export default function CourseForm({
                         <input
                           type="text"
                           value={item}
-                          onChange={(e) => updateArrayItem('includes', index, e.target.value)}
+                          onChange={(e) =>
+                            updateArrayItem("includes", index, e.target.value)
+                          }
                           className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="e.g., Lifetime access to course materials"
                         />
                         <button
                           type="button"
-                          onClick={() => deleteArrayItem('includes', index)}
+                          onClick={() => deleteArrayItem("includes", index)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                         >
                           <Trash2 size={16} />
@@ -678,7 +835,7 @@ export default function CourseForm({
                   </label>
                   <button
                     type="button"
-                    onClick={() => addArrayItem('learningOutcomes')}
+                    onClick={() => addArrayItem("learningOutcomes")}
                     className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
                   >
                     <Plus size={14} />
@@ -688,7 +845,8 @@ export default function CourseForm({
                 <div className="space-y-2">
                   {formData.learningOutcomes.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center py-2">
-                      No outcomes added. Click &quot;Add Outcome&quot; to add what students will learn.
+                      No outcomes added. Click &quot;Add Outcome&quot; to add
+                      what students will learn.
                     </p>
                   ) : (
                     formData.learningOutcomes.map((item, index) => (
@@ -696,13 +854,21 @@ export default function CourseForm({
                         <input
                           type="text"
                           value={item}
-                          onChange={(e) => updateArrayItem('learningOutcomes', index, e.target.value)}
+                          onChange={(e) =>
+                            updateArrayItem(
+                              "learningOutcomes",
+                              index,
+                              e.target.value,
+                            )
+                          }
                           className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="e.g., Master core concepts and principles"
                         />
                         <button
                           type="button"
-                          onClick={() => deleteArrayItem('learningOutcomes', index)}
+                          onClick={() =>
+                            deleteArrayItem("learningOutcomes", index)
+                          }
                           className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                         >
                           <Trash2 size={16} />
@@ -721,7 +887,7 @@ export default function CourseForm({
                   </label>
                   <button
                     type="button"
-                    onClick={() => addArrayItem('requirements')}
+                    onClick={() => addArrayItem("requirements")}
                     className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
                   >
                     <Plus size={14} />
@@ -731,7 +897,8 @@ export default function CourseForm({
                 <div className="space-y-2">
                   {formData.requirements.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center py-2">
-                      No requirements added. Click &quot;Add Requirement&quot; to add prerequisites.
+                      No requirements added. Click &quot;Add Requirement&quot;
+                      to add prerequisites.
                     </p>
                   ) : (
                     formData.requirements.map((item, index) => (
@@ -739,13 +906,19 @@ export default function CourseForm({
                         <input
                           type="text"
                           value={item}
-                          onChange={(e) => updateArrayItem('requirements', index, e.target.value)}
+                          onChange={(e) =>
+                            updateArrayItem(
+                              "requirements",
+                              index,
+                              e.target.value,
+                            )
+                          }
                           className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="e.g., Basic computer knowledge"
                         />
                         <button
                           type="button"
-                          onClick={() => deleteArrayItem('requirements', index)}
+                          onClick={() => deleteArrayItem("requirements", index)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
                         >
                           <Trash2 size={16} />
@@ -778,7 +951,9 @@ export default function CourseForm({
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
                     <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600 mx-auto" />
-                    <p className="mt-2 text-sm text-slate-600">Loading modules...</p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Loading modules...
+                    </p>
                   </div>
                 </div>
               ) : modules.length === 0 ? (
@@ -864,8 +1039,8 @@ export default function CourseForm({
 
                           {module.lessons.length === 0 ? (
                             <p className="text-xs text-slate-500 text-center py-2">
-                              No lessons added. Click &quot;Add Lesson&quot;
-                              to add one.
+                              No lessons added. Click &quot;Add Lesson&quot; to
+                              add one.
                             </p>
                           ) : (
                             <div className="space-y-3">
@@ -881,7 +1056,7 @@ export default function CourseForm({
                                     </label>
                                     <input
                                       type="text"
-                                      value={lesson.title}
+                                      value={lesson.title || ""}
                                       onChange={(e) =>
                                         updateLesson(
                                           module.id,
@@ -901,7 +1076,7 @@ export default function CourseForm({
                                       Description
                                     </label>
                                     <textarea
-                                      value={lesson.description}
+                                      value={lesson.description || ""}
                                       onChange={(e) =>
                                         updateLesson(
                                           module.id,
@@ -923,7 +1098,7 @@ export default function CourseForm({
                                     </label>
                                     <input
                                       type="url"
-                                      value={lesson.videoUrl}
+                                      value={lesson.videoUrl || ""}
                                       onChange={(e) =>
                                         updateLesson(
                                           module.id,
@@ -945,7 +1120,7 @@ export default function CourseForm({
                                       </label>
                                       <input
                                         type="number"
-                                        value={lesson.order}
+                                        value={lesson.order || ""}
                                         onChange={(e) =>
                                           updateLesson(
                                             module.id,

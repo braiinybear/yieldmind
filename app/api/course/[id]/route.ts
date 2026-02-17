@@ -30,6 +30,7 @@ interface CourseUpdateData {
   slug?: string;
   instructorName: string;
   instructorBio: string;
+  demoVideo?: string;
 }
 
 // What this API does:
@@ -162,6 +163,7 @@ export async function PUT(
       type: course.type,
       shortDescription: course.shortDescription,
       instructorName: course.instructorName,
+      demoVideo:course.demoVideo,
       instructorBio: course.instructorBio,
       venue: course.venue || null,
       startDate: course.startDate ? new Date(course.startDate) : null,

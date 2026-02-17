@@ -16,6 +16,7 @@ import CourseForm from "../../../../components/admin/CourseForm";
 
 import { useCourseStore } from "@/zustand/root-store-provider";
 import { toast } from "sonner";
+import Image from "next/image";
 
 /* ---------- Helpers ---------- */
 
@@ -143,62 +144,87 @@ export default function AdminCoursePage() {
           </thead>
 
           <tbody className="divide-y">
-            {paginatedCourses?.map((course, index) => (
-              <tr
-                key={course.id || `course-${index}`}
-                className="hover:bg-slate-50"
-              >
-                <td className="px-6 py-4">
-                  <p className="font-medium text-slate-900">{course.title}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {course.description?.slice(0, 40)}...
-                  </p>
-                </td>
+            {paginatedCourses?.map((course, index) => {
+              // Compute circular thumbnail URL if course.thumbnail exists
+              const circleThumb = course.thumbnail
+                ? course.thumbnail.replace(
+                    "/upload/",
+                    "/upload/w_48,h_48,c_thumb,g_face,r_max/"
+                  )
+                : null;
+              return (
+                <tr
+                  key={course.id || `course-${index}`}
+                  className="hover:bg-slate-50"
+                >
+                  <td className="px-6 py-4 flex items-center gap-3">
+                    {circleThumb ? (
+                      <Image
 
-                <td className="px-6 py-4">₹{(course.price || 0).toFixed(2)}</td>
+                        width={40}
+                        height={40}
+                        src={circleThumb}
+                        alt={course.title + " thumbnail"}
+                        className="w-10 h-10 rounded-full object-cover border border-slate-200 bg-white"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-500">
+                        N/A
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-slate-900">{course.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {course.description?.slice(0, 40)}...
+                      </p>
+                    </div>
+                  </td>
 
-                <td className="px-6 py-4">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium">
-                    {course.type}
-                  </span>
-                </td>
+                  <td className="px-6 py-4">₹{(course.price || 0).toFixed(2)}</td>
 
-                <td className="px-6 py-4">{formatDate(course.startDate)}</td>
+                  <td className="px-6 py-4">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium">
+                      {course.type}
+                    </span>
+                  </td>
 
-                <td className="px-6 py-4">{course.duration || "N/A"}</td>
+                  <td className="px-6 py-4">{formatDate(course.startDate)}</td>
 
-                <td className="px-6 py-4">{course.batchSize || "N/A"}</td>
+                  <td className="px-6 py-4">{course.duration || "N/A"}</td>
 
-                <td className="px-6 py-4">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setIsFormOpen(true);
-                      }}
-                      className="rounded p-2 text-blue-600 hover:bg-blue-50"
-                    >
-                      <Edit2 size={16} />
-                    </button>
+                  <td className="px-6 py-4">{course.batchSize || "N/A"}</td>
 
-                    <button
-                      onClick={() => router.push(`/admin/courses/${course.id}`)}
-                      className="rounded p-2 text-green-600 hover:bg-green-50"
-                    >
-                      <Eye size={16} />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedCourse(course);
+                          setIsFormOpen(true);
+                        }}
+                        className="rounded p-2 text-blue-600 hover:bg-blue-50"
+                      >
+                        <Edit2 size={16} />
+                      </button>
 
-                    <button
-                      onClick={() => handleDeleteCourse(course.id, course.title)}
-                      disabled={deleteLoading}
-                      className="rounded p-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      <button
+                        onClick={() => router.push(`/admin/courses/${course.id}`)}
+                        className="rounded p-2 text-green-600 hover:bg-green-50"
+                      >
+                        <Eye size={16} />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteCourse(course.id, course.title)}
+                        disabled={deleteLoading}
+                        className="rounded p-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -98,6 +98,8 @@ export const CourseStore = (initState: CourseState = defaultInitState) => {
     },
 
     updateCourse: async (id, payload) => {
+      console.log("update",id,payload);
+      
       try {
         set((state) => ({
           loading: { ...state.loading, update: true },

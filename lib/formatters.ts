@@ -105,6 +105,27 @@ export function toTitleCase(text: string): string {
 }
 
 // ============================================
+// IMAGE URL FORMATTING
+// ============================================
+
+/**
+ * Convert a Google Drive share link to a direct image URL
+ * Transforms: https://drive.google.com/file/d/{ID}/view?...
+ * To: https://lh3.googleusercontent.com/d/{ID}
+ * Also handles: https://drive.google.com/open?id={ID}
+ * Non-Drive URLs are returned as-is
+ */
+export function toDirectImageUrl(url: string): string {
+  const match = url.match(/[-\w]{25,}/);
+  if (!match) return url;
+
+  const fileId = match[0];
+
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2000`;
+}
+
+
+// ============================================
 // SLUG FORMATTING
 // ============================================
 

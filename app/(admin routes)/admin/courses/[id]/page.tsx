@@ -13,6 +13,7 @@ import {
   Video,
 } from "lucide-react";
 import { Course } from "@prisma/client";
+import Image from "next/image";
 
 interface Lesson {
   id: string;
@@ -128,10 +129,12 @@ export default function CourseDetailPage() {
       <div className="rounded-lg overflow-hidden bg-white shadow-lg">
         {course?.thumbnail && (
           <div className="relative h-64 md:h-80 w-full bg-slate-200 overflow-hidden">
-            <img
+            <Image
+          
               src={course.thumbnail}
-              alt={course.title}
-              className="w-full h-full object-fit"
+              alt={course.title}  
+              fill
+              className="w-full h-full object-fill"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
