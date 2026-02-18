@@ -156,7 +156,7 @@ export default function LoadingScreen() {
 
                 {/* Typography */}
                 <div ref={textWrapperRef} className="text-center space-y-6 opacity-0">
-                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-white to-white/50">
+                    <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-linear-to-b from-white to-white/50 tracking-wide">
                         YIELDMIND
                     </h1>
                     <div className="h-px w-24 mx-auto bg-linear-to-r from-transparent via-primary to-transparent opacity-50" />
